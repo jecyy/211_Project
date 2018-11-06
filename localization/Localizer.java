@@ -23,8 +23,10 @@ public class Localizer {
 	private static EV3LargeRegulatedMotor rightMotor;
 	private static double leftRadius, rightRadius, track;
 	private static final int ROTATE_SPEED = 125;
-	private static final double TILE_SIZE = 30.48;
-	private static final int d = 35; // threshold for determining alpha and beta
+	private static final double ts = 30.48;
+	private static final int[] startingLL = new int[2];
+	private static final int[] startingUR = new int[2]; // coordinates for starting corner
+	private static final double d = 35 + ts * (startingUR[0] - startingLL[0] - 1); // threshold for determining alpha and beta
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall
 	private static double a, b, alpha; // two edges of a triangle, with an angle used for correct orientation
 	private static double xdis, ydis; // distances from the wall
@@ -226,8 +228,8 @@ public class Localizer {
 	 * This method makes the robot travel to its right-front vertex (may not be used)
 	 */
 	private static void travelToStart() {
-		double deltaX = TILE_SIZE - odo.getXYT()[0];
-		double deltaY = TILE_SIZE - odo.getXYT()[1];
+		double deltaX = ts - odo.getXYT()[0];
+		double deltaY = ts - odo.getXYT()[1];
 		double toTravel = Math.sqrt(deltaX * deltaX + deltaY * deltaY); // calculate the distance between the current and next way point
 
 		// here we are trying to find theta based on different cases,
