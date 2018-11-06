@@ -8,9 +8,9 @@ import usSensor.UltrasonicPoller;
 
 /**
  * This is an alternative approach to do localization,
- * using only an ultrasonic sensor and based on Law of cosines.
- * The robot will be at the original position after the localization
- * knowing its current position and orientation.
+ * using only an ultrasonic sensor and based on Law of cosines and sines.
+ * The robot will know its current position and orientation relatively to the walls
+ * when this localization is done.
  * @author jecyy
  *
  */
@@ -34,7 +34,7 @@ public class Localizer {
 
 
 	/**
-	 * This is the main method that runs the Ultrasonic Localizer
+	 * This method controls the whole localization process
 	 * @param left
 	 * @param right
 	 * @param leftR
@@ -184,6 +184,10 @@ public class Localizer {
 		finished = true; // localization finished
 	}
 
+	/**
+	 * The robot will turn a given angle when this method is called
+	 * @param theta
+	 */
 	private static void turn (double theta) {
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
@@ -210,11 +214,17 @@ public class Localizer {
 		}
 	}
 
+	/**
+	 * This method sets the speeds of left and right motors to 0
+	 */
 	private static void freeze() {
 		leftMotor.setSpeed(0);
 		rightMotor.setSpeed(0);
 	}
 
+	/**
+	 * This method makes the robot travel to its right-front vertex (may not be used)
+	 */
 	private static void travelToStart() {
 		double deltaX = TILE_SIZE - odo.getXYT()[0];
 		double deltaY = TILE_SIZE - odo.getXYT()[1];
@@ -259,15 +269,30 @@ public class Localizer {
 		rightMotor.rotate(convertDistance(rightRadius, toTravel), false);
 	}
 
+	/**
+	 * Given the radius of the motor and the distance the robot needs to travel,
+	 * this method returns the angle in degree that a motor should rotate
+	 * @param radius
+	 * @param distance
+	 * @return
+	 */
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
+	/**
+	 * This method returns the angle a motor should rotate in order for the robot to turn a given angle
+	 * @param radius
+	 * @param width
+	 * @param angle
+	 * @return
+	 */
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
-
+/*
 	public Localizer() {
 
 	}
+	*/
 }

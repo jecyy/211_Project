@@ -5,7 +5,7 @@ import lejos.robotics.SampleProvider;
 
 /**
  * This class runs the ultrasonic sensor using a thread
- * and provides the readings
+ * and provides the readings.
  * @author jecyy
  *
  */
@@ -14,16 +14,18 @@ public class UltrasonicPoller extends Thread {
 	private float[] usData;
 	private static int distance;
 
+	/**
+	 * Class constructor
+	 * @param us
+	 * @param usData
+	 */
 	public UltrasonicPoller(SampleProvider us, float[] usData) {
 		this.us = us;
 		this.usData = usData;
 	}
 
-	/*
-	 * Sensors now return floats using a uniform protocol. Need to convert US result to an integer
-	 * [0,255] (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#run()
+	/**
+	 * This method transfers the ultrasonic sensor readings into integers ranging [2, 200]
 	 */
 	public void run() {
 		while (true) {

@@ -4,7 +4,7 @@ import lejos.robotics.SampleProvider;
 import odometer.Odometer;
 
 /**
- * This class provides the left light sensor readings
+ * This class provides the left light sensor readings.
  * @author jecyy
  *
  */
@@ -16,11 +16,19 @@ public class LightSensorLeft extends Thread {
 	private float[] sampleLight;
 	private Odometer odo;
 	
+	/**
+	 * Default constructor
+	 * @param myLightSample
+	 * @param sampleLight
+	 */
 	public LightSensorLeft(SampleProvider myLightSample, float[] sampleLight) {
 		this.myLightSample = myLightSample;
 		this.sampleLight = sampleLight;
 	}
 	
+	/**
+	 * This method converts the light sensor reading into a float ranging [0, 1000]
+	 */
 	public void run() {
 		while (true) {
 			myLightSample.fetchSample(sampleLight, 0); // activate the light sensor

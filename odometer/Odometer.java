@@ -3,7 +3,7 @@ package odometer;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * This class runs the odometer, recording the current position of the robot 
+ * This class runs the odometer, recording the current position and orientation of the robot 
  * @author jecyy
  *
  */
@@ -29,11 +29,11 @@ public class Odometer extends OdometerData implements Runnable {
   private static final long ODOMETER_PERIOD = 20; // odometer update period in ms
 
   /**
-   * This is the default constructor of this class. It initiates all motors and variables once.It
-   * cannot be accessed externally.
-   * 
+   * This is the default constructor which initiates all motors and relevant variables
    * @param leftMotor
    * @param rightMotor
+   * @param TRACK
+   * @param WHEEL_RAD
    * @throws OdometerExceptions
    */
   private Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
@@ -55,11 +55,12 @@ public class Odometer extends OdometerData implements Runnable {
   }
 
   /**
-   * This method is meant to ensure only one instance of the odometer is used throughout the code.
-   * 
+   * This method is to ensure that only one odometer is used throughout the program
    * @param leftMotor
    * @param rightMotor
-   * @return new or existing Odometer Object
+   * @param TRACK
+   * @param WHEEL_RAD
+   * @return
    * @throws OdometerExceptions
    */
   public synchronized static Odometer getOdometer(EV3LargeRegulatedMotor leftMotor,
@@ -74,10 +75,9 @@ public class Odometer extends OdometerData implements Runnable {
   }
 
   /**
-   * This class is meant to return the existing Odometer Object. It is meant to be used only if an
-   * odometer object has been created
-   * 
-   * @return error if no previous odometer exists
+   * This method returns the current odometer instance (throws error if there is none)
+   * @return
+   * @throws OdometerExceptions
    */
   public synchronized static Odometer getOdometer() throws OdometerExceptions {
 
@@ -89,10 +89,8 @@ public class Odometer extends OdometerData implements Runnable {
   }
 
   /**
-   * This method is where the logic for the odometer will run. Use the methods provided from the
-   * OdometerData class to implement the odometer.
+   * This method updates the odometer based on the tacho count of wheels
    */
-  // run method (required for Thread)
   public void run() {
     double distL,distR,deltaD,dX,dY,dT;//
     double T;

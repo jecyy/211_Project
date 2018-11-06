@@ -18,12 +18,21 @@ public class LightSensorRight extends Thread {
 	private static double angle;
 	private static double ts = 30.48;
 	
+	/**
+	 * Default constructor
+	 * @param myLightSample
+	 * @param sampleLight
+	 * @param odometer
+	 */
 	public LightSensorRight(SampleProvider myLightSample, float[] sampleLight, Odometer odometer) {
 		this.myLightSample = myLightSample;
 		this.sampleLight = sampleLight;
 		this.odo = odometer;
 	}
 	
+	/**
+	 * This method converts the light sensor reading into a float ranging [0, 1000]
+	 */
 	public void run() {
 		while (true) {
 			myLightSample.fetchSample(sampleLight, 0); // activate the light sensor

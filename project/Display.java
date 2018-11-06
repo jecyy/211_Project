@@ -3,13 +3,17 @@ package project;
 import lejos.hardware.lcd.TextLCD;
 
 /**
- * This class is used to show the color sensor reading for the color classification mode
+ * This class runs the display as a thread 
+ * and specifies what need to be on the screen.
+ * @author jecyy
+ *
  */
 public class Display implements Runnable{
 	private TextLCD lcd;
 
 	/**
-	 * This is the class constructor
+	 * Class constructor
+	 * @param lcd
 	 */
 	public Display(TextLCD lcd) {
 		this.lcd = lcd;

@@ -3,7 +3,7 @@ package lightSensor;
 import lejos.robotics.SampleProvider;
 
 /**
- * This class runs the color sensor and provides the readings
+ * This class runs the color sensor and provides the readings.
  * @author jecyy
  *
  */
@@ -12,11 +12,19 @@ public class ColorSensorPoller extends Thread {
 	private SampleProvider myColorSample;
 	private float[] sampleColor;
 	
+	/**
+	 * Default constructor
+	 * @param myColorSample
+	 * @param sampleColor
+	 */
 	public ColorSensorPoller(SampleProvider myColorSample, float[] sampleColor) {
 		this.myColorSample = myColorSample;
 		this.sampleColor = sampleColor;
 	}
 	
+	/**
+	 * This method gets the color sensor readings and converts them into floats ranging [0, 255]
+	 */
 	public void run() {
 		while (true) {
 			myColorSample.fetchSample(sampleColor, 0); // activate the color sensor
@@ -31,17 +39,25 @@ public class ColorSensorPoller extends Thread {
 	}
 
 	/**
-	 * This method is to read the current sensor reading
+	 * This method is to read the current Red value
 	 * @return
 	 */
 	public static float getR() {
 		return R;
 	}
 	
+	/**
+	 * This method is to read the current Green value
+	 * @return
+	 */
 	public static float getG() {
 		return G;
 	}
 	
+	/**
+	 * This method is to read the current Blue value
+	 * @return
+	 */
 	public static float getB() {
 		return B;
 	}
