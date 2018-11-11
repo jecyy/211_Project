@@ -1,9 +1,11 @@
 package navigation;
 
+import grasping.Grasp;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lightSensor.LightSensorLeft;
 import lightSensor.LightSensorRight;
 import odometer.Odometer;
+import unload.Unload;
 
 /**
  * This class implements the traveling algorithm,
@@ -122,7 +124,7 @@ public class Navigation {
 		// the next step is to travel the robot to the tree
 		int treex = Tx - 1, treey = Ty - 1;
 		travelTo(treex, treey);
-		// TODO: add Grasping here, maybe as a thread
+		Grasp.grasp(leftM, rightM, radius, radius, trac, odo);
 		// after the grasping, the robot should travel back to the starting position
 		// first, let's go back to the tunnel
 		if (tn_ur_y - tn_ll_y == 1) { // tunnel is along x-axis
@@ -159,7 +161,8 @@ public class Navigation {
 		// now the robot should be positioned at the entrance of the tunnel with leftaxis and rightaxis updated
 		// next go back to the starting corner
 		travelTo(startx, starty);
-		// TODO: unload
+		
+		Unload.unload();
 	}
 
 	/**
