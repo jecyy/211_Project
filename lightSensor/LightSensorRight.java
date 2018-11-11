@@ -2,7 +2,6 @@ package lightSensor;
 
 import lejos.robotics.SampleProvider;
 import navigation.Navigation;
-import odometer.Odometer;
 
 /**
  * This class provides the right light sensor readings
@@ -13,10 +12,9 @@ public class LightSensorRight extends Thread {
 	private static float light = 0;
 	private SampleProvider myLightSample;
 	private float[] sampleLight;
-	private Odometer odo;
-	private static int black = 300; // black threshold
+	private static final int black = 300; // black threshold
 	private static double angle;
-	private static double ts = 30.48;
+	private static final double ts = 30.48;
 	
 	/**
 	 * Default constructor
@@ -24,10 +22,9 @@ public class LightSensorRight extends Thread {
 	 * @param sampleLight
 	 * @param odometer
 	 */
-	public LightSensorRight(SampleProvider myLightSample, float[] sampleLight, Odometer odometer) {
+	public LightSensorRight(SampleProvider myLightSample, float[] sampleLight) {
 		this.myLightSample = myLightSample;
 		this.sampleLight = sampleLight;
-		this.odo = odometer;
 	}
 	
 	/**
@@ -42,6 +39,7 @@ public class LightSensorRight extends Thread {
 			} catch (Exception e) {
 			}
 			
+			// the position of the right-side light sensor is updated here
 			if (light < black) { // black line detected
 				if (angle < 45 && angle > 315) {
 					Navigation.rightaxis[1] += ts;

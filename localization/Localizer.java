@@ -24,9 +24,7 @@ public class Localizer {
 	private static double leftRadius, rightRadius, track;
 	private static final int ROTATE_SPEED = 125;
 	private static final double ts = 30.48;
-	private static final int[] startingLL = new int[2];
-	private static final int[] startingUR = new int[2]; // coordinates for starting corner
-	private static final double d = 35 + ts * (startingUR[0] - startingLL[0] - 1); // threshold for determining alpha and beta
+	private static final double d = 35; // threshold for determining alpha and beta
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall
 	private static double a, b, alpha; // two edges of a triangle, with an angle used for correct orientation
 	private static double xdis, ydis; // distances from the wall
@@ -217,7 +215,7 @@ public class Localizer {
 	}
 
 	/**
-	 * This method sets the speeds of left and right motors to 0
+	 * This method sets the speeds of both left and right motors to 0
 	 */
 	private static void freeze() {
 		leftMotor.setSpeed(0);
