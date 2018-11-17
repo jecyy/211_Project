@@ -114,7 +114,7 @@ public class Odometer extends OdometerData implements Runnable {
       T += dT;                                                                        // update heading
       dX = deltaD * Math.sin(T * 2 * pi / 360);                                       // compute X component of displacement
       dY = deltaD * Math.cos(T * 2 * pi / 360);                                       // compute Y component of displacement
-      odo.update(dX,dY,dT);                                                           // Update odometer values with new calculated values
+      odo.update(-dX,-dY,-dT);                                                           // Update odometer values with new calculated values
 
       // this ensures that the odometer only runs once every period
       try {
