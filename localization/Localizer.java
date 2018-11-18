@@ -24,11 +24,11 @@ public class Localizer {
 	private static double leftRadius, rightRadius, track;
 	private static final int ROTATE_SPEED = 125;
 	private static final double ts = 30.48;
-	private static final double d = 35; // threshold for determining alpha and beta
+	private static final double d = 37; // threshold for determining alpha and beta
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall
 	private static double a, b, alpha; // two edges of a triangle, with an angle used for correct orientation
 	private static double xdis, ydis; // distances from the wall
-	private static final double extraDis = 6.8; // extra distance traveled before entering Light Localizer
+	private static final double extraDis = 6.8; // TODO: distance from us sensor to rotation center
 	private static final double pi = Math.PI;
 	public static boolean finished = false; // indicates whether the whole ultrasonic localization process is finished
 
@@ -177,9 +177,18 @@ public class Localizer {
 
 		odo.setTheta(180 + alpha);
 		
-		//travelToStart();
+		travelToStart();
 		turn(-odo.getXYT()[2]);
 		freeze();
+		
+		Sound.beep();
+		Sound.twoBeeps(); // 3 beeps
+		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+
+		}
 
 		finished = true; // localization finished
 	}
@@ -192,8 +201,8 @@ public class Localizer {
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
 
-		leftMotor.rotate(convertAngle(leftRadius, track, theta), true);
-		rightMotor.rotate(-convertAngle(rightRadius, track, theta), false);
+		leftMotor.rotate(-convertAngle(leftRadius, track, theta), true);
+		rightMotor.rotate(convertAngle(rightRadius, track, theta), false);
 	}
 
 	/**
@@ -205,12 +214,12 @@ public class Localizer {
 		rightMotor.setSpeed(ROTATE_SPEED);
 
 		if (isClockwise == true) {
-			leftMotor.forward();
-			rightMotor.backward();
-		}
-		else {
 			leftMotor.backward();
 			rightMotor.forward();
+		}
+		else {
+			leftMotor.forward();
+			rightMotor.backward();
 		}
 	}
 
@@ -233,30 +242,30 @@ public class Localizer {
 		// here we are trying to find theta based on different cases,
 		// where theta is the angle that the robot needs to rotate
 		double currentT = odo.getXYT()[2];
-		double theta;
-		if (deltaX == 0 && deltaY >= 0) {
-			theta = - currentT;
-		}
-		else if (deltaX == 0) {
-			theta = 180 - currentT;
-		}
-		else if (deltaY == 0 && deltaX < 0) {
-			theta = - currentT - 90;
-		}
-		else if (deltaY == 0 && deltaX > 0) {
-			theta = - currentT + 90;
-		}
-		else {
-			theta = 90 - Math.atan(deltaY / deltaX) * 180 / pi - currentT;
-			if (deltaX <= 0 && deltaY <= 0) {
-				theta = theta - 180;
-			}
-			if (deltaX <= 0 && deltaY >= 0) {
-				theta = - theta;
-			}
-		}
-		if (theta >= 180) theta -= 360;
-		if (theta <= -180) theta += 360;
+		double theta = 45 - currentT;
+//		if (deltaX == 0 && deltaY >= 0) {
+//			theta = - currentT;
+//		}
+//		else if (deltaX == 0) {
+//			theta = 180 - currentT;
+//		}
+//		else if (deltaY == 0 && deltaX < 0) {
+//			theta = - currentT - 90;
+//		}
+//		else if (deltaY == 0 && deltaX > 0) {
+//			theta = - currentT + 90;
+//		}
+//		else {
+//			theta = 90 - Math.atan(deltaY / deltaX) * 180 / pi - currentT;
+//			if (deltaX <= 0 && deltaY <= 0) {
+//				theta = theta - 180;
+//			}
+//			if (deltaX <= 0 && deltaY >= 0) {
+//				theta = - theta;
+//			}
+//		}
+//		if (theta >= 180) theta -= 360;
+//		if (theta <= -180) theta += 360;
 
 		// take the turn
 		turn(theta);
@@ -265,8 +274,8 @@ public class Localizer {
 
 		leftMotor.setSpeed(150);
 		rightMotor.setSpeed(150);
-		leftMotor.rotate(convertDistance(leftRadius, toTravel), true);
-		rightMotor.rotate(convertDistance(rightRadius, toTravel), false);
+		leftMotor.rotate(-convertDistance(leftRadius, toTravel), true);
+		rightMotor.rotate(-convertDistance(rightRadius, toTravel), false);
 	}
 
 	/**
@@ -290,9 +299,4 @@ public class Localizer {
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
-/*
-	public Localizer() {
-
-	}
-	*/
 }
