@@ -4,7 +4,7 @@ import lejos.robotics.SampleProvider;
 
 /**
  * This class runs the color sensor and provides the readings.
- * @author jecyy
+ * @author jecyy 
  *
  */
 public class ColorSensorPoller extends Thread {

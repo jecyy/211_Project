@@ -16,7 +16,11 @@ import unload.Unload;
  *
  */
 public class Navigation {
-
+	/*TODO: Fix odometer, it dirves backwards we have a few different solutions
+	 * 		1. Use heading variable that determines where it should be facing and how it should turn
+	 *		2. Actually fix odometer 
+	 *		3. Change orientation of motors
+	 */
 	public static int[] leftaxis = new int[2];  // TODO: be consistent with starting position 
 	public static int[] rightaxis = new int[2]; // grid position of the light sensors
 	private static EV3LargeRegulatedMotor leftM;
@@ -194,7 +198,7 @@ public class Navigation {
 		// now the robot should be positioned at the entrance of the tunnel with leftaxis and rightaxis updated
 		// next go back to the starting corner
 		travelTo(startx, starty);
-		
+		//Unload the rings
 		Unload.unload();
 	}
 
