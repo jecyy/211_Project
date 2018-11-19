@@ -253,19 +253,21 @@ public class Navigation {
 	 * with odometer correction.
 	 */
 	private static void travel1() {
-	    long left_time = 0, right_time = 0;
+	    //long left_time = 0, right_time = 0;
 		go();
 		boolean left_passed = false, right_passed = false; // indicates that the left/right light sensor has passed a line
-		while(!(left_passed && right_passed)) { // if loop breaks when both sensors have seen the line
-			if (!left_passed && LightSensorLeft.get_light() < black) {
+		while(true) { // if loop breaks when both sensors have seen the line
+			if (LightSensorLeft.get_light() < black) {
 				left_passed = true;
-			    left_time = System.currentTimeMillis();
+			    //left_time = System.currentTimeMillis();
 			    Sound.beep();
+			    break;
 			}
-			if (!right_passed && LightSensorRight.get_light() < black) {
+			if (LightSensorRight.get_light() < black) {
 				right_passed = true;
-			    right_time = System.currentTimeMillis();
+			    //right_time = System.currentTimeMillis();
 			    Sound.beep();
+			    break;
 			}
 			try {
 				Thread.sleep(50);
@@ -274,9 +276,32 @@ public class Navigation {
 			}
 		}
 		freeze();
-		long dif = left_time - right_time; // time difference between the two detections
-		double d = FORWARD_SPEED * (dif / 1000) * (pi / 180) * radius; // distance traveled by the robot within dif
-		adjustOrientation(d); // adjust the orientation
+		
+		if (left_passed) {
+			keepTurning(false);
+			while(LightSensorRight.get_light() >= black) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+
+				}
+			}
+		}
+		else { // right passed
+			keepTurning(true);
+			while(LightSensorLeft.get_light() >= black) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+
+				}
+			}
+		}
+		Sound.beep();
+		
+//		long dif = left_time - right_time; // time difference between the two detections
+//		double d = FORWARD_SPEED * (dif / 1000) * (pi / 180) * radius; // distance traveled by the robot within dif
+//		adjustOrientation(d); // adjust the orientation
 		freeze();
 		// correct the odometer orientation &
 		// correct the odometer position
@@ -298,6 +323,7 @@ public class Navigation {
 			odo.setTheta(270);
 			//odo.setX((leftaxis[0] + rightaxis[0])/2 - offset);
 		}
+		travelDistance(2); // go beyond the line to avoid mis-detecting
 	}
 
 	/**
@@ -359,6 +385,25 @@ public class Navigation {
 		rightM.setSpeed(FORWARD_SPEED);
 		leftM.backward();
 		rightM.backward();
+	}
+	
+	/**
+	 * This method keeps the robot rotating with a choice of clockwise or anti
+	 * (this is different from the one in Localizer in that only one motor moves here)
+	 * @param isClockwise
+	 */
+	private static void keepTurning (boolean isClockwise) {
+		leftM.setSpeed(ROTATE_SPEED);
+		rightM.setSpeed(ROTATE_SPEED);
+
+		if (isClockwise == true) {
+			leftM.backward();
+			//rightM.forward();
+		}
+		else {
+			//leftM.forward();
+			rightM.backward();
+		}
 	}
 	
 	/**
