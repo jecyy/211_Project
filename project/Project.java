@@ -15,7 +15,7 @@ import lightSensor.ColorSensorPoller;
 import lightSensor.LightSensorLeft;
 import lightSensor.LightSensorRight;
 import localization.Localizer;
-import localization.Localizer2;
+//import localization.Localizer2;
 import navigation.Navigation;
 import odometer.Odometer;
 import odometer.OdometerExceptions;
@@ -24,7 +24,7 @@ import usSensor.UltrasonicPoller;
 /**
  * This will be the main class that calls all threads (besides the main thread) 
  * and controls the work flow of the whole process.
- * @author jecyy
+ * @authors jecyy, PaulHooley
  *
  */
 public class Project {
@@ -32,6 +32,7 @@ public class Project {
 	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
 	private static final Port usPort = LocalEV3.get().getPort("S1");
+	private static final Port ringUsPort = LocalEV3.get().getPort("A");
 	private static final Port leftLight = LocalEV3.get().getPort("S2");
 	private static final Port rightLight = LocalEV3.get().getPort("S3");
 	private static final Port portColor = LocalEV3.get().getPort("S4");
@@ -123,6 +124,11 @@ public class Project {
 		SensorModes usSensor = new EV3UltrasonicSensor(usPort); // usSensor is the instance
 		SampleProvider usDistance = usSensor.getMode("Distance"); // usDistance provides samples from
 		float[] usData = new float[usDistance.sampleSize()]; // usData is the buffer in which data are
+		//Ring ultrasonic sensor
+		@SuppressWarnings("resource") 
+		SensorModes ringUsSensor = new EV3UltrasonicSensor(ringUsPort); 
+		SampleProvider ringUsDistance = ringUsSensor.getMode("Distance"); 
+		float[] ringUsData = new float[ringUsDistance.sampleSize()]; 
 		// leftLight sensor
 		@SuppressWarnings("resource")
 		SensorModes leftlight = new EV3ColorSensor(leftLight);
@@ -140,6 +146,7 @@ public class Project {
 		float[] sampleColor = new float[3];
 		// returned
 		UltrasonicPoller ultrasonic = new UltrasonicPoller(usDistance, usData);
+		UltrasonicPoller ringUltrasonic = new UltrasonicPoller(ringUsDistance, ringUsData);
 		LightSensorLeft leftlightsensor = new LightSensorLeft(leftLightSample, sampleLightleft);
 		LightSensorRight rightlightsensor = new LightSensorRight(rightLightSample, sampleLightright);
 		ColorSensorPoller color = new ColorSensorPoller(myColorSample, sampleColor);
@@ -166,7 +173,6 @@ public class Project {
 			// Start UltrasonicPoller
 			Thread UltrasonicThread = new Thread(ultrasonic);
 			UltrasonicThread.start();
-
 			Thread rightThread = new Thread(rightlightsensor);
 			rightThread.start();
 

@@ -15,11 +15,12 @@ public class Unload {
 	 */
 	  private static EV3LargeRegulatedMotor unloadMotor;
 	  private static int unloadSpeed = 100;
+	  private static int unloadAngle = 90;
 	  
 	  public static void unload(){
 		  
 		  unloadMotor.setSpeed(unloadSpeed);
-		  unloadMotor.forward();
+		  unloadMotor.rotate(unloadAngle);
 		  
 		  try {
 			Thread.sleep(500);

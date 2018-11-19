@@ -17,10 +17,10 @@ public class Grasp {
 	private static double leftR, rightR, trac;
 	private static odometer.Odometer odo;
 	private static double pi = Math.PI;
-	private static int FORWARD_SPEED = 175, ROTATE_SPEED = 100, SEARCH_SPEED = 100;
-	private static int treeBase = 10; //Distance robot has to travel before turning
-	private static double ringDist = 4.5; 
-	private static double colorOffset = 2.2; //Distance between usSensor and color sensor
+	private static int ROTATE_SPEED = 100, SEARCH_SPEED = 100;
+	private static double treeBase = 18.5; //Distance robot has to travel before turning
+	private static double ringDist = 3.0; 
+	private static double colorOffset = 1.2; //Distance between ringUs and colorSensor
 	
 	
 	public static void grasp(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double leftRadius,
@@ -85,7 +85,7 @@ public class Grasp {
 		double curx = odo.getXYT()[0];
 		double cury = odo.getXYT()[1];
 		//If the robot does not see the ring || has not driven far enough 
-		while(usSensor.UltrasonicPoller.get_distance() > ringDist || convertDistance(2.2, distanceConversion( curx, cury, treeX, treeY)) >= treeBase ){ 
+		while(ringUsSensor.UltrasonicPoller.get_distance() > ringDist || convertDistance(2.2, distanceConversion( curx, cury, treeX, treeY)) >= treeBase ){ 
 			left.forward();
 			right.forward();
 			try {
@@ -93,7 +93,7 @@ public class Grasp {
 			} catch (InterruptedException e) {
 			}
 		}//If the ring was found 
-		if(usSensor.UltrasonicPoller.get_distance() < ringDist){
+		if(ringUsSensor.UltrasonicPoller.get_distance() < ringDist){
 			left.setSpeed(0);
 			right.setSpeed(0);
 			//Call ring found
@@ -116,7 +116,7 @@ public class Grasp {
 	private static void ringFound() { //Method called once a ring has been found
 		left.setSpeed(SEARCH_SPEED);
 		right.setSpeed(SEARCH_SPEED);
-		//usSensor and color sensor are offset by 2.2cm
+		//usSensor and colo	r sensor are offset by 2.2cm
 		left.rotate(convertDistance(colorOffset, 5), true);
 		right.rotate(convertDistance(colorOffset, 5), false);
 		//Call color sensor

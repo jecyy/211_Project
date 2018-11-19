@@ -4,7 +4,7 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
  * This class runs the odometer, recording the current position and orientation of the robot 
- * @author jecyy
+ * @authors jecyy, PaulHooley
  *
  */
 public class Odometer extends OdometerData implements Runnable {
