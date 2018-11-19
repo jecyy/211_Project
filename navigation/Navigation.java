@@ -1,6 +1,7 @@
 package navigation;
 
 import grasping.Grasp;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lightSensor.LightSensorLeft;
 import lightSensor.LightSensorRight;
@@ -25,7 +26,7 @@ public class Navigation {
 	private static double lightTrac = 7.5; // TODO: measure the distance between two light sensors
 	private static double pi = Math.PI;
 	private static final int ROTATE_SPEED = 75;
-	private static final int FORWARD_SPEED = 200;
+	private static final int FORWARD_SPEED = 175;
 	private static final double ts = 30.48;
 	private static final int black = 300; // threshold for black line
 	private static final double offset = 10; // TODO: the distance between the center of light-track and the center of rotation
@@ -51,112 +52,144 @@ public class Navigation {
 		final int startx, starty;
 		// adjust leftaxis ,rightaxis first
 		if (starting_corner == 0) {
-			leftaxis[0] = 0;
-			leftaxis[1] = 0;
-			rightaxis[0] = 0;
-			rightaxis[1] = 0;
-			startx = 0;
-			starty = 0;
+//			leftaxis[0] = 0;
+//			leftaxis[1] = 0;
+//			rightaxis[0] = 0;
+//			rightaxis[1] = 0;
+			startx = 1;
+			starty = 1;
+			odo.setTheta(0);
 		}
 		else if (starting_corner == 1) {
-			leftaxis[0] = 14;
-			leftaxis[1] = 0;
-			rightaxis[0] = 14;
-			rightaxis[1] = 0;
-			startx = 14;
-			starty = 0;
+//			leftaxis[0] = 14;
+//			leftaxis[1] = 0;
+//			rightaxis[0] = 14;
+//			rightaxis[1] = 0;
+			startx = 7;
+			starty = 1;
+			odo.setTheta(270);
 		}
 		else if (starting_corner == 2) {
-			leftaxis[0] = 14;
-			leftaxis[1] = 8;
-			rightaxis[0] = 14;
-			rightaxis[1] = 14;
-			startx = 14;
-			starty = 8;
+//			leftaxis[0] = 14;
+//			leftaxis[1] = 8;
+//			rightaxis[0] = 14;
+//			rightaxis[1] = 14;
+			startx = 7;
+			starty = 7;
+			odo.setTheta(180);
 		}
 		else { // starting_corner == 3
-			leftaxis[0] = 0;
-			leftaxis[1] = 8;
-			rightaxis[0] = 0;
-			rightaxis[1] = 8;
-			startx = 0;
-			starty = 8;
+//			leftaxis[0] = 0;
+//			leftaxis[1] = 8;
+//			rightaxis[0] = 0;
+//			rightaxis[1] = 8;
+			startx = 1;
+			starty = 7;
+			odo.setTheta(90);
 		}
 		
 		
 		// in the very beginning, the robot should be located around the center of the starting corner
 		// so we need to travel to the tunnel first
 		int tunnelx , tunnely; // the tile we need to get to before entering the tunnel
-		if (tn_ur_y - tn_ll_y == 1) { // tunnel is along x-axis
+		boolean tn_along_x;
+		if (tn_ur_y - tn_ll_y == 1) tn_along_x = true;
+		else tn_along_x = false;
+		if (tn_along_x) { // tunnel is along x-axis
 			tunnelx = tn_ll_x - 1;
-			tunnely = tn_ll_y;
+			tunnely = tn_ll_y + 1;
 		}
 		else { // tunnel is along y-axis
-			tunnelx = tn_ll_x;
+			tunnelx = tn_ll_x + 1;
 			tunnely = tn_ll_y - 1;
 		}
 		// travel to the tunnel
-		travelTo(tunnelx, tunnely);
+		travelTo(tunnelx, tunnely); // travel to the grid diagonal to the LL point of tunnel
 		// now we have to head to the direction of the tunnel
-		if (tn_ll_x - tunnelx == 1) {
+		if (tn_along_x) {
+			turn(180 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
 			turn(90 - odo.getXYT()[2]);
 		}
 		else {
+			turn(270 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
 			turn(0 - odo.getXYT()[2]);
 		}
 		// now the robot should be heading to the tunnel
-		// since the tunnel is 2 ts long, we make the robot travel for 3 ts
-		travelDistance(3 * ts + 2);
+		// since the tunnel is 2 ts long, we make the robot travel for 4 ts
+		travelDistance(4 * ts);
 		// update leftaxis and rightaxis
-		if (tn_ur_y - tn_ll_y == 1) { // tunnel is along x-axis
-			leftaxis[0] = tn_ur_x;
-			leftaxis[1] = tn_ur_y - 1;
-			rightaxis[0] = tn_ur_x;
-			rightaxis[1] = tn_ur_y - 1;
+		if (tn_along_x) { // tunnel is along x-axis
+//			leftaxis[0] = tn_ur_x;
+//			leftaxis[1] = tn_ur_y - 1;
+//			rightaxis[0] = tn_ur_x;
+//			rightaxis[1] = tn_ur_y - 1;
+			turn(180 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
+			odo.setX((tn_ur_x + 1) * ts);
+			odo.setY((tn_ur_y - 1) * ts);
 		}
 		else { // tunnel is along y-axis
-			leftaxis[0] = tn_ur_x - 1;
-			leftaxis[1] = tn_ur_y;
-			rightaxis[0] = tn_ur_x - 1;
-			rightaxis[1] = tn_ur_y;
+//			leftaxis[0] = tn_ur_x - 1;
+//			leftaxis[1] = tn_ur_y;
+//			rightaxis[0] = tn_ur_x - 1;
+//			rightaxis[1] = tn_ur_y;
+			turn(270 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
+			odo.setX((tn_ur_x - 1) * ts);
+			odo.setY((tn_ur_y + 1) * ts);
 		}
 		// now the robot should be positioned at the exit of the tunnel
+		// (the grid diagonal to the UR point of tunnel)
 		// the next step is to travel the robot to the tree
-		int treex = Tx - 1, treey = Ty - 1;
+		int treex = Tx - 1, treey = Ty;
 		travelTo(treex, treey);
 		Grasp.grasp(leftM, rightM, radius, radius, trac, odo);
 		// after the grasping, the robot should travel back to the starting position
 		// first, let's go back to the tunnel
-		if (tn_ur_y - tn_ll_y == 1) { // tunnel is along x-axis
-			tunnelx = tn_ur_x;
-			tunnely = tn_ll_y - 1;
+		if (tn_along_x) { // tunnel is along x-axis
+			tunnelx = tn_ur_x + 1;
+			tunnely = tn_ur_y - 1;
 		}
 		else { // tunnel is along y-axis
 			tunnelx = tn_ur_x - 1;
-			tunnely = tn_ll_y;
+			tunnely = tn_ur_y + 1;
 		}
 		travelTo(tunnelx, tunnely);
 		// head to tunnel
-		if (tn_ur_y - tunnely == 1) { // tunnel along x-axis
+		if (tn_along_x) { // tunnel along x-axis
+			turn(0 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
 			turn(270 - odo.getXYT()[2]);
 		}
 		else {
+			turn(90 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
 			turn(180 - odo.getXYT()[2]);
 		}
 		// go thorugh the tunnel
-		travelDistance(3 * ts + 2);
+		travelDistance(4 * ts);
 		// update leftaxis and rightaxis
-		if (tn_ur_y - tn_ll_y == 1) { // tunnel is along x-axis
-			leftaxis[0] = tn_ll_x - 1;
-			leftaxis[1] = tn_ur_y;
-			rightaxis[0] = tn_ur_x - 1;
-			rightaxis[1] = tn_ur_y;
+		if (tn_along_x) { // tunnel is along x-axis
+//			leftaxis[0] = tn_ll_x - 1;
+//			leftaxis[1] = tn_ur_y;
+//			rightaxis[0] = tn_ur_x - 1;
+//			rightaxis[1] = tn_ur_y;
+			turn(0 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
+			odo.setX((tn_ll_x - 1) * ts);
+			odo.setY((tn_ll_y + 1) * ts);
 		}
 		else { // tunnel is along y-axis
-			leftaxis[0] = tn_ur_x;
-			leftaxis[1] = tn_ur_y - 1;
-			rightaxis[0] = tn_ur_x;
-			rightaxis[1] = tn_ur_y - 1;
+//			leftaxis[0] = tn_ur_x;
+//			leftaxis[1] = tn_ur_y - 1;
+//			rightaxis[0] = tn_ur_x;
+//			rightaxis[1] = tn_ur_y - 1;
+			turn(90 - odo.getXYT()[2]);
+			travelDistance(ts / 2);
+			odo.setX((tn_ll_x + 1) * ts);
+			odo.setY((tn_ll_y - 1) * ts);
 		}
 		// now the robot should be positioned at the entrance of the tunnel with leftaxis and rightaxis updated
 		// next go back to the starting corner
@@ -199,8 +232,8 @@ public class Navigation {
 	private static void travelDistance(double s) {
 		leftM.setSpeed(FORWARD_SPEED);
 		rightM.setSpeed(FORWARD_SPEED);
-		leftM.rotate(convertDistance(radius, s));
-		rightM.rotate(convertDistance(radius, s));
+		leftM.rotate(-convertDistance(radius, s));
+		rightM.rotate(-convertDistance(radius, s));
 	}
 	
 	/**
@@ -227,15 +260,22 @@ public class Navigation {
 			if (!left_passed && LightSensorLeft.get_light() < black) {
 				left_passed = true;
 			    left_time = System.currentTimeMillis();
+			    Sound.beep();
 			}
 			if (!right_passed && LightSensorRight.get_light() < black) {
 				right_passed = true;
 			    right_time = System.currentTimeMillis();
+			    Sound.beep();
+			}
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+
 			}
 		}
 		freeze();
 		long dif = left_time - right_time; // time difference between the two detections
-		double d = FORWARD_SPEED * 1000 * dif * pi / 180 * radius; // distance traveled by the robot within dif
+		double d = FORWARD_SPEED * (dif / 1000) * (pi / 180) * radius; // distance traveled by the robot within dif
 		adjustOrientation(d); // adjust the orientation
 		freeze();
 		// correct the odometer orientation &
@@ -244,19 +284,19 @@ public class Navigation {
 		// we can use them to calculate the position of center of rotation using an offset
 		if (heading() == 0) {
 			odo.setTheta(0);
-			odo.setY((leftaxis[1] + rightaxis[1])/2 + offset);
+			//odo.setY((leftaxis[1] + rightaxis[1])/2 + offset);
 		}
 		else if (heading() == 1) {
 			odo.setTheta(90);
-			odo.setX((leftaxis[0] + rightaxis[0])/2 + offset);
+			//odo.setX((leftaxis[0] + rightaxis[0])/2 + offset);
 		}
 		else if(heading() == 2) {
 			odo.setTheta(180);
-			odo.setY((leftaxis[1] + rightaxis[1])/2 - offset);
+			//odo.setY((leftaxis[1] + rightaxis[1])/2 - offset);
 		}
 		else {
 			odo.setTheta(270);
-			odo.setX((leftaxis[0] + rightaxis[0])/2 - offset);
+			//odo.setX((leftaxis[0] + rightaxis[0])/2 - offset);
 		}
 	}
 
@@ -277,8 +317,8 @@ public class Navigation {
 	private static void turn(double theta) {
 		leftM.setSpeed(ROTATE_SPEED);
 		rightM.setSpeed(ROTATE_SPEED);
-		leftM.rotate(convertAngle(radius, trac, theta), true);
-		rightM.rotate(-convertAngle(radius, trac, theta), false);
+		leftM.rotate(-convertAngle(radius, trac, theta), true);
+		rightM.rotate(convertAngle(radius, trac, theta), false);
 	}
 
 	/**
@@ -317,8 +357,8 @@ public class Navigation {
 	private static void go() {
 		leftM.setSpeed(FORWARD_SPEED);
 		rightM.setSpeed(FORWARD_SPEED);
-		leftM.forward();
-		rightM.forward();
+		leftM.backward();
+		rightM.backward();
 	}
 	
 	/**
