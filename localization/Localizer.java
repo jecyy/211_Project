@@ -28,10 +28,10 @@ public class Localizer {
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall
 	private static double a, b, alpha; // two edges of a triangle, with an angle used for correct orientation
 	private static double xdis, ydis; // distances from the wall
-	private static final double extraDis = 6.8; // TODO: distance from us sensor to rotation center
+	private static final double extraDis = 11.2; // TODO: distance from us sensor to rotation center
 	private static final double pi = Math.PI;
 	public static boolean finished = false; // indicates whether the whole ultrasonic localization process is finished
-
+	private static final int maxX = 8, maxY = 8; // TODO: the size of map
 
 	/**
 	 * This method controls the whole localization process
@@ -43,7 +43,7 @@ public class Localizer {
 	 * @param odom
 	 */
 	public static void run(EV3LargeRegulatedMotor left, EV3LargeRegulatedMotor right,
-			double leftR, double rightR, double trac, Odometer odom) {
+			double leftR, double rightR, double trac, Odometer odom, int starting_corner) {
 
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {left, right}) {
 			motor.stop();
@@ -190,6 +190,28 @@ public class Localizer {
 
 		}
 
+		// adjust odometer according to starting corner
+		if (starting_corner == 0) {
+			odo.setTheta(0);
+			odo.setX(ts);
+			odo.setY(ts);
+		}
+		else if (starting_corner == 1) {
+			odo.setTheta(270);
+			odo.setX(ts * (maxX - 1));
+			odo.setY(ts);
+		}
+		else if (starting_corner == 2) {
+			odo.setTheta(180);
+			odo.setX(ts * (maxX - 1));
+			odo.setY(ts * (maxY - 1));
+		}
+		else { // starting_corner == 3
+			odo.setTheta(90);
+			odo.setX(ts);
+			odo.setY(ts * (maxY - 1));
+		}
+		
 		finished = true; // localization finished
 	}
 
