@@ -34,6 +34,7 @@ public class Navigation {
 	private static final double ts = 30.48;
 	private static final int black = 300; // threshold for black line
 	private static final double offset = 10; // TODO: the distance between the center of light-track and the center of rotation
+	private static int currentx, currenty;
 
 	/**
 	 * This method controls the navigation process and is the one that called in the main thread
@@ -59,21 +60,29 @@ public class Navigation {
 		if (starting_corner == 0) {
 			startx = 1;
 			starty = 1;
+			currentx = 1;
+			currenty = 1;
 			odo.setTheta(0);
 		}
 		else if (starting_corner == 1) {
 			startx = 7;
 			starty = 1;
+			currentx = 7;
+			currenty = 1;
 			odo.setTheta(270);
 		}
 		else if (starting_corner == 2) {
 			startx = 7;
 			starty = 7;
+			currentx = 7;
+			currenty = 7;
 			odo.setTheta(180);
 		}
 		else { // starting_corner == 3
 			startx = 1;
 			starty = 7;
+			currentx = 1;
+			currenty = 7;
 			odo.setTheta(90);
 		}
 		// in the very beginning, the robot should be located around the center of the starting corner
@@ -175,7 +184,6 @@ public class Navigation {
 	 * @param y
 	 */
 	private static void travelTo(int x, int y) {
-		int currentx = leftaxis[0], currenty = leftaxis[1];
 		int xdis = x - currentx, ydis = y - currenty;
 		// x direction
 		if (xdis >= 0) {
@@ -185,6 +193,7 @@ public class Navigation {
 			turn(270 - odo.getXYT()[2]); // turn to 270 degree
 		}
 		lineTravel(Math.abs(xdis));
+		currentx = x;
 		// y direction
 		if (ydis > 0) {
 			turn(0 - odo.getXYT()[2]); // turn to 0 degree
@@ -193,6 +202,7 @@ public class Navigation {
 			turn(180 - odo.getXYT()[2]); // turn to 180 degree
 		}
 		lineTravel(Math.abs(ydis));
+		currenty = y;
 	}
 	
 	/**
