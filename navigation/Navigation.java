@@ -12,7 +12,7 @@ import unload.Unload;
  * This class implements the traveling algorithm,
  * the robot will only run along the X-axis and Y-axis directions
  * so that the odometer is corrected every time the robot passes a tile.
- * @author jecyy
+ * @authors jecyy, PaulHooley
  *
  */
 public class Navigation {
@@ -46,60 +46,41 @@ public class Navigation {
 	 */
 	public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
 			double Radius, double track, Odometer odometer, 
-			int tn_ll_x, int tn_ll_y, int tn_ur_x, int tn_ur_y, int starting_corner, int Tx, int Ty) {
+			int tn_ll_x, int tn_ll_y, int tn_ur_x, int tn_ur_y, int starting_corner, int Tx, int Ty, int islandury, int islandlly) {
 		leftM = leftMotor;
 		rightM = rightMotor;
 		radius = Radius;
 		trac = track;
 		odo = odometer;
-		
+		final int T_Length = tunnelLength(tn_ll_x, tn_ll_y, tn_ur_x, tn_ur_y);
+		final boolean tunnelIsVertical = tunnelIsVertical( tn_ll_y, tn_ur_y, starting_corner, islandury, islandlly);
 		final int startx, starty;
 		// adjust leftaxis ,rightaxis first
 		if (starting_corner == 0) {
-//			leftaxis[0] = 0;
-//			leftaxis[1] = 0;
-//			rightaxis[0] = 0;
-//			rightaxis[1] = 0;
 			startx = 1;
 			starty = 1;
 			odo.setTheta(0);
 		}
 		else if (starting_corner == 1) {
-//			leftaxis[0] = 14;
-//			leftaxis[1] = 0;
-//			rightaxis[0] = 14;
-//			rightaxis[1] = 0;
 			startx = 7;
 			starty = 1;
 			odo.setTheta(270);
 		}
 		else if (starting_corner == 2) {
-//			leftaxis[0] = 14;
-//			leftaxis[1] = 8;
-//			rightaxis[0] = 14;
-//			rightaxis[1] = 14;
 			startx = 7;
 			starty = 7;
 			odo.setTheta(180);
 		}
 		else { // starting_corner == 3
-//			leftaxis[0] = 0;
-//			leftaxis[1] = 8;
-//			rightaxis[0] = 0;
-//			rightaxis[1] = 8;
 			startx = 1;
 			starty = 7;
 			odo.setTheta(90);
 		}
-		
-		
 		// in the very beginning, the robot should be located around the center of the starting corner
 		// so we need to travel to the tunnel first
 		int tunnelx , tunnely; // the tile we need to get to before entering the tunnel
-		boolean tn_along_x;
-		if (tn_ur_y - tn_ll_y == 1) tn_along_x = true;
-		else tn_along_x = false;
-		if (tn_along_x) { // tunnel is along x-axis
+		
+		if (!tunnelIsVertical) { // tunnel is along x-axis
 			tunnelx = tn_ll_x - 1;
 			tunnely = tn_ll_y + 1;
 		}
@@ -110,7 +91,7 @@ public class Navigation {
 		// travel to the tunnel
 		travelTo(tunnelx, tunnely); // travel to the grid diagonal to the LL point of tunnel
 		// now we have to head to the direction of the tunnel
-		if (tn_along_x) {
+		if (tunnelIsVertical) {
 			turn(180 - odo.getXYT()[2]);
 			travelDistance(ts / 2);
 			turn(90 - odo.getXYT()[2]);
@@ -121,24 +102,16 @@ public class Navigation {
 			turn(0 - odo.getXYT()[2]);
 		}
 		// now the robot should be heading to the tunnel
-		// since the tunnel is 2 ts long, we make the robot travel for 4 ts
-		travelDistance(4 * ts);
+		// Travel the distance of the tunnel + 1, so that we are on the other side of the tunnel
+		travelDistance(T_Length * ts + 1);
 		// update leftaxis and rightaxis
-		if (tn_along_x) { // tunnel is along x-axis
-//			leftaxis[0] = tn_ur_x;
-//			leftaxis[1] = tn_ur_y - 1;
-//			rightaxis[0] = tn_ur_x;
-//			rightaxis[1] = tn_ur_y - 1;
+		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(180 - odo.getXYT()[2]);
 			travelDistance(ts / 2);
 			odo.setX((tn_ur_x + 1) * ts);
 			odo.setY((tn_ur_y - 1) * ts);
 		}
 		else { // tunnel is along y-axis
-//			leftaxis[0] = tn_ur_x - 1;
-//			leftaxis[1] = tn_ur_y;
-//			rightaxis[0] = tn_ur_x - 1;
-//			rightaxis[1] = tn_ur_y;
 			turn(270 - odo.getXYT()[2]);
 			travelDistance(ts / 2);
 			odo.setX((tn_ur_x - 1) * ts);
@@ -151,8 +124,9 @@ public class Navigation {
 		travelTo(treex, treey);
 		Grasp.grasp(leftM, rightM, radius, radius, trac, odo);
 		// after the grasping, the robot should travel back to the starting position
+		//Returning
 		// first, let's go back to the tunnel
-		if (tn_along_x) { // tunnel is along x-axis
+		if (!tunnelIsVertical) { // tunnel is along x-axis
 			tunnelx = tn_ur_x + 1;
 			tunnely = tn_ur_y - 1;
 		}
@@ -162,7 +136,7 @@ public class Navigation {
 		}
 		travelTo(tunnelx, tunnely);
 		// head to tunnel
-		if (tn_along_x) { // tunnel along x-axis
+		if (!tunnelIsVertical) { // tunnel along x-axis
 			turn(0 - odo.getXYT()[2]);
 			travelDistance(ts / 2);
 			turn(270 - odo.getXYT()[2]);
@@ -173,23 +147,15 @@ public class Navigation {
 			turn(180 - odo.getXYT()[2]);
 		}
 		// go thorugh the tunnel
-		travelDistance(4 * ts);
+		travelDistance(T_Length * ts + 1);
 		// update leftaxis and rightaxis
-		if (tn_along_x) { // tunnel is along x-axis
-//			leftaxis[0] = tn_ll_x - 1;
-//			leftaxis[1] = tn_ur_y;
-//			rightaxis[0] = tn_ur_x - 1;
-//			rightaxis[1] = tn_ur_y;
+		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(0 - odo.getXYT()[2]);
 			travelDistance(ts / 2);
 			odo.setX((tn_ll_x - 1) * ts);
 			odo.setY((tn_ll_y + 1) * ts);
 		}
 		else { // tunnel is along y-axis
-//			leftaxis[0] = tn_ur_x;
-//			leftaxis[1] = tn_ur_y - 1;
-//			rightaxis[0] = tn_ur_x;
-//			rightaxis[1] = tn_ur_y - 1;
 			turn(90 - odo.getXYT()[2]);
 			travelDistance(ts / 2);
 			odo.setX((tn_ll_x + 1) * ts);
@@ -428,6 +394,44 @@ public class Navigation {
 		}
 		else {
 			return 3; // 270
+		}
+	}
+	/**
+	 * This method returns the orientation of the tunnel
+	 * @param tn_ll_x
+	 * @param tn_ll_y
+	 * @param tn_ur_x
+	 * @param tn_ur_y
+	 * @return
+	 */
+	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ //TODO: Get vertical tunnel
+		if(starting_location < 2){
+			if(tn_ur_y > islandury){
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			if(tn_ll_y < islandlly){
+				return true;
+			}else{
+				return false;
+			}
+		}
+	}
+	/**
+	 * This method returns the length of the tunnel
+	 * @param tn_ll_x
+	 * @param tn_ll_y
+	 * @param tn_ur_x
+	 * @param tn_ur_y
+	 * @return
+	 */
+	private static int tunnelLength(int tn_ll_x, int tn_ll_y, int tn_ur_x, int tn_ur_y){ 
+		if(tn_ur_y - tn_ll_y == 1 && tn_ur_x - tn_ll_x == 1){
+			return 1;
+		}else{
+			return 2;
 		}
 	}
 }

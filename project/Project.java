@@ -192,7 +192,7 @@ public class Project {
 
 			(new Thread() { // spawn a new Thread to avoid Search.run() from blocking
 				public void run() {
-					Navigation.drive(leftMotor, rightMotor, WHEEL_RAD, TRACK, odometer, tnllx, tnlly, tnurx, tnury, starting_corner, tx, ty);
+					Navigation.drive(leftMotor, rightMotor, WHEEL_RAD, TRACK, odometer, tnllx, tnlly, tnurx, tnury, starting_corner, tx, ty, islandury, islandlly);
 				}
 			}).start();
 
