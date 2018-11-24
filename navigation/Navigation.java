@@ -32,9 +32,10 @@ public class Navigation {
 	private static final int ROTATE_SPEED = 75;
 	private static final int FORWARD_SPEED = 175;
 	private static final double ts = 30.48;
-	private static final int black = 300; // threshold for black line
+	private static final int black = 50; // threshold for black line
 	private static final double offset = 10; // TODO: the distance between the center of light-track and the center of rotation
 	private static int currentx, currenty;
+	private static final int DETECTION_PERIOD = 30;
 
 	/**
 	 * This method controls the navigation process and is the one that called in the main thread
@@ -53,10 +54,18 @@ public class Navigation {
 		radius = Radius;
 		trac = track;
 		odo = odometer;
+		
+		
+		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftM, rightM}) {
+			motor.stop();
+			motor.setAcceleration(6000);
+		}
+		
+		
 		final int T_Length = tunnelLength(tn_ll_x, tn_ll_y, tn_ur_x, tn_ur_y);
 		final boolean tunnelIsVertical = tunnelIsVertical( tn_ll_y, tn_ur_y, starting_corner, islandury, islandlly);
 		final int startx, starty;
-		// adjust leftaxis ,rightaxis first
+		// adjust startx, starty, currentx, currenty first
 		if (starting_corner == 0) {
 			startx = 1;
 			starty = 1;
@@ -97,6 +106,9 @@ public class Navigation {
 			tunnelx = tn_ll_x + 1;
 			tunnely = tn_ll_y - 1;
 		}
+		
+		
+		
 		// travel to the tunnel
 		travelTo(tunnelx, tunnely); // travel to the grid diagonal to the LL point of tunnel
 		// now we have to head to the direction of the tunnel
@@ -212,8 +224,8 @@ public class Navigation {
 	private static void travelDistance(double s) {
 		leftM.setSpeed(FORWARD_SPEED);
 		rightM.setSpeed(FORWARD_SPEED);
-		leftM.rotate(-convertDistance(radius, s));
-		rightM.rotate(-convertDistance(radius, s));
+		leftM.rotate(-convertDistance(radius, s), true);
+		rightM.rotate(-convertDistance(radius, s), false);
 	}
 	
 	/**
@@ -234,47 +246,60 @@ public class Navigation {
 	 */
 	private static void travel1() {
 	    //long left_time = 0, right_time = 0;
+		double leftlight1 = 0, rightlight1 = 0, leftlight2 = 0, rightlight2 = 0; // 2 : current reading; 1: previous reading
 		go();
 		boolean left_passed = false, right_passed = false; // indicates that the left/right light sensor has passed a line
 		while(true) { // if loop breaks when both sensors have seen the line
-			if (LightSensorLeft.get_light() < black) {
+			leftlight2 = LightSensorLeft.get_light();
+			rightlight2 = LightSensorRight.get_light();
+			if (leftlight1 - leftlight2 > black) {
+				freeze();
 				left_passed = true;
 			    //left_time = System.currentTimeMillis();
 			    Sound.beep();
 			    break;
 			}
-			if (LightSensorRight.get_light() < black) {
+			if (rightlight1 - rightlight2 > black) {
+				freeze();
 				right_passed = true;
 			    //right_time = System.currentTimeMillis();
 			    Sound.beep();
 			    break;
 			}
 			try {
-				Thread.sleep(50);
+				Thread.sleep(DETECTION_PERIOD);
 			} catch (InterruptedException e) {
 
 			}
+			leftlight1 = leftlight2;
+			rightlight1 = rightlight2;
 		}
 		freeze();
 		
 		if (left_passed) {
 			keepTurning(false);
-			while(LightSensorRight.get_light() >= black) {
+			while(true) {
+				rightlight2 = LightSensorRight.get_light();
+				if (rightlight1 - rightlight2 > black) break; 
 				try {
-					Thread.sleep(50);
+					Thread.sleep(DETECTION_PERIOD);
 				} catch (InterruptedException e) {
 
 				}
+				rightlight1 = rightlight2;
 			}
 		}
 		else { // right passed
 			keepTurning(true);
-			while(LightSensorLeft.get_light() >= black) {
+			while(true) {
+				leftlight2 = LightSensorLeft.get_light();
+				if (leftlight1 - leftlight2 > black) break; 
 				try {
-					Thread.sleep(50);
+					Thread.sleep(DETECTION_PERIOD);
 				} catch (InterruptedException e) {
 
 				}
+				leftlight1 = leftlight2;
 			}
 		}
 		Sound.beep();
@@ -303,7 +328,7 @@ public class Navigation {
 			odo.setTheta(270);
 			//odo.setX((leftaxis[0] + rightaxis[0])/2 - offset);
 		}
-		travelDistance(2); // go beyond the line to avoid mis-detecting
+		travelDistance(offset); // go beyond the line to avoid mis-detecting
 	}
 
 	/**
@@ -416,13 +441,13 @@ public class Navigation {
 	 */
 	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ //TODO: Get vertical tunnel
 		if(starting_location < 2){
-			if(tn_ur_y > islandury){
+			if(tn_ur_y > islandlly){
 				return true;
 			}else{
 				return false;
 			}
 		}else{
-			if(tn_ll_y < islandlly){
+			if(tn_ll_y < islandury){
 				return true;
 			}else{
 				return false;
@@ -442,6 +467,21 @@ public class Navigation {
 			return 1;
 		}else{
 			return 2;
+		}
+	}
+	
+	private static boolean toLL(int tn_ll_x, int tn_ll_y, int tn_ur_x, int tn_ur_y, int starting_corner, boolean tunnelIsVertical) {
+		if (starting_corner == 0) return true;
+		else if (starting_corner == 1) {
+			if (tunnelIsVertical) return true;
+			else return false;
+		}
+		else if (starting_corner == 2) {
+			return false;
+		}
+		else {
+			if (tunnelIsVertical) return false;
+			else return true;
 		}
 	}
 }
