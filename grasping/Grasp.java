@@ -17,10 +17,12 @@ public class Grasp {
 	private static double leftR, rightR, trac;
 	private static odometer.Odometer odo;
 	private static double pi = Math.PI;
-	private static int ROTATE_SPEED = 100, SEARCH_SPEED = 100;
+	private static int ROTATE_SPEED = 100, SEARCH_SPEED = 100, TRAVEL_SPEED = 200;
 	private static double treeBase = 18.5; //Distance robot has to travel before turning
 	private static double ringDist = 3.0; 
 	private static double colorOffset = 1.2; //Distance between ringUs and colorSensor
+	public static final double WHEEL_RAD = 2.2;
+	private static final double ts = 30.48;
 	
 	
 	public static void grasp(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double leftRadius,
@@ -51,8 +53,16 @@ public class Grasp {
 		//Saves starting location
 		double orix = odo.getXYT()[0];
 		double oriy = odo.getXYT()[1];
-		//Tree circulating
+		//Travel to center of square
+		left.setSpeed(TRAVEL_SPEED);
+		right.setSpeed(TRAVEL_SPEED);
+		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
 		turn(90);
+		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
+		turn(-90);
+		//Tree circulating
 		search();
 		turn(90);
 		search();
@@ -78,16 +88,16 @@ public class Grasp {
 		//Setting search speeds
 		left.setSpeed(SEARCH_SPEED);
 		right.setSpeed(SEARCH_SPEED);
-		left.forward();
-		right.forward();
+		left.backward();
+		right.backward();
 		double treeX = odo.getXYT()[0];
 		double treeY = odo.getXYT()[1];
 		double curx = odo.getXYT()[0];
 		double cury = odo.getXYT()[1];
 		//If the robot does not see the ring || has not driven far enough 
 		while(ringUsSensor.UltrasonicPoller.get_distance() > ringDist || convertDistance(2.2, distanceConversion( curx, cury, treeX, treeY)) >= treeBase ){ 
-			left.forward();
-			right.forward();
+			left.backward();
+			right.backward();
 			try {
 				Thread.sleep(500);
 			} catch (InterruptedException e) {

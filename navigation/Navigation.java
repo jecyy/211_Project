@@ -577,7 +577,7 @@ public class Navigation {
 	 * @param tn_ur_y
 	 * @return
 	 */
-	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ //TODO: Get vertical tunnel
+	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ 
 		if(starting_location < 2){
 			if(tn_ur_y > islandlly){
 				return false;
