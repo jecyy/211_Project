@@ -126,12 +126,12 @@ public class Navigation {
 		adjustOrientation();
 		// now we have to head to the direction of the tunnel
 		if (!tunnelIsVertical) {
-			travelDistanceBack(ts / 2 - 11);
+			travelDistanceBack(ts / 2 - offset + 2);
 			turn(90 - odo.getXYT()[2]);
 			odo.setTheta(90);
 		}
 		else {
-			travelDistanceBack(ts / 2 - 11);
+			travelDistanceBack(ts / 2 - offset + 2);
 			turn(0 - odo.getXYT()[2]);
 			odo.setTheta(0);
 		}
@@ -140,6 +140,7 @@ public class Navigation {
 		// now the robot should be heading to the tunnel
 		// Travel the distance of the tunnel + 1, so that we are on the other side of the tunnel
 		travelDistance((T_Length + 2) * ts + offset + 5);
+		resetHeading();
 		// update leftaxis and rightaxis
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(180 - odo.getXYT()[2]);
@@ -170,7 +171,7 @@ public class Navigation {
 		// now the robot should be positioned at the exit of the tunnel
 		// (the grid diagonal to the UR point of tunnel)
 		// the next step is to travel the robot to the tree
-		int treex = Tx - 1, treey = Ty - 1;
+		int treex = Tx - 1, treey = Ty;
 		travelTo(treex, treey);
 		Grasp.grasp(leftM, rightM, radius, radius, trac, odo);
 		// after the grasping, the robot should travel back to the starting position
@@ -214,6 +215,7 @@ public class Navigation {
 		adjustOrientation();
 		// go thorugh the tunnel
 		travelDistance((T_Length + 2) * ts + offset);
+		resetHeading();
 		// update odometer
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(0 - odo.getXYT()[2]);
@@ -388,19 +390,15 @@ public class Navigation {
 		// we can use them to calculate the position of center of rotation using an offset
 		if (heading() == 0) {
 			odo.setTheta(0);
-			//odo.setY((leftaxis[1] + rightaxis[1])/2 + offset);
 		}
 		else if (heading() == 1) {
 			odo.setTheta(90);
-			//odo.setX((leftaxis[0] + rightaxis[0])/2 + offset);
 		}
 		else if(heading() == 2) {
 			odo.setTheta(180);
-			//odo.setY((leftaxis[1] + rightaxis[1])/2 - offset);
 		}
 		else {
 			odo.setTheta(270);
-			//odo.setX((leftaxis[0] + rightaxis[0])/2 - offset);
 		}
 		travelDistance(offset); // go beyond the line to avoid mis-detecting
 	}
@@ -484,6 +482,7 @@ public class Navigation {
 	private static void turn(double theta) {
 		if (theta > 180) theta -= 360;
 		if (theta < -180) theta += 360;
+		//if (theta > 0) theta += 0;
 		leftM.setSpeed(ROTATE_SPEED);
 		rightM.setSpeed(ROTATE_SPEED);
 		leftM.rotate(-convertAngle(radius, trac, theta), true);
@@ -549,6 +548,21 @@ public class Navigation {
 		}
 	}
 	
+	private static void resetHeading() {
+		if (heading() == 0) {
+			odo.setTheta(0);
+		}
+		else if (heading() == 1) {
+			odo.setTheta(90);
+		}
+		else if(heading() == 2) {
+			odo.setTheta(180);
+		}
+		else {
+			odo.setTheta(270);
+		}
+	}
+	
 	/**
 	 * This method returns the expected heading of the robot currently.
 	 * (0 for 0 degree, 1 for 90 degree, 2 for 180 degree, 3 for 270 degree)
@@ -577,7 +591,7 @@ public class Navigation {
 	 * @param tn_ur_y
 	 * @return
 	 */
-	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ 
+	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ //TODO: Get vertical tunnel
 		if(starting_location < 2){
 			if(tn_ur_y > islandlly){
 				return false;

@@ -3,6 +3,8 @@ package grasping;
 
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lightSensor.LightSensorLeft;
+import lightSensor.LightSensorRight;
 import odometer.Odometer;
 
 /**
@@ -18,11 +20,13 @@ public class Grasp {
 	private static odometer.Odometer odo;
 	private static double pi = Math.PI;
 	private static int ROTATE_SPEED = 100, SEARCH_SPEED = 100, TRAVEL_SPEED = 200;
-	private static double treeBase = 18.5; //Distance robot has to travel before turning
+//	private static double treeBase = 20.0; //Distance robot has to travel before turning
 	private static double ringDist = 3.0; 
-	private static double colorOffset = 1.2; //Distance between ringUs and colorSensor
+	private static double offset = 10.0; // distance from light sensor to the wheel
 	public static final double WHEEL_RAD = 2.2;
 	private static final double ts = 30.48;
+	private static final int black = 100;
+	private static final int DETECTION_PERIOD = 30;
 	
 	
 	public static void grasp(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double leftRadius,
@@ -54,25 +58,27 @@ public class Grasp {
 		double orix = odo.getXYT()[0];
 		double oriy = odo.getXYT()[1];
 		//Travel to center of square
+		adjustOrientation();
 		left.setSpeed(TRAVEL_SPEED);
 		right.setSpeed(TRAVEL_SPEED);
-		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
-		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
+		left.rotate(convertDistance(WHEEL_RAD, ts/2 - offset), true);
+		right.rotate(convertDistance(WHEEL_RAD, ts/2 - offset), false);
 		turn(90);
-		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
-		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
-		turn(-90);
+		adjustOrientation();
+		left.rotate(-convertDistance(WHEEL_RAD, ts/2 + offset), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts/2 + offset), false);
+		//turn(-90);
 		//Tree circulating
 		search();
-		turn(90);
+		turn(-90);
 		search();
-		turn(90);
+		turn(-90);
 		search();
-		turn(90);
+		turn(-90);
 		search();
 		double x = odo.getXYT()[0];
 		double y = odo.getXYT()[1];
-		//Return back to starting point
+		//Return back to starting point TODO: change this to drive until sees line
 		left.rotate(convertDistance(distanceConversion(x, y, orix, oriy), 5), true);
 		right.rotate(convertDistance(distanceConversion(x, y, orix, oriy), 5), false);
 		
@@ -84,38 +90,25 @@ public class Grasp {
 		
 		
 	}
-	private static void search(){ //Causes robot to slowly drive untill it either passes the tree or sees a ring
+	private static void search(){ //Causes robot to slowly drive until it either passes the tree or sees a ring
 		//Setting search speeds
 		left.setSpeed(SEARCH_SPEED);
 		right.setSpeed(SEARCH_SPEED);
-		left.backward();
-		right.backward();
-		double treeX = odo.getXYT()[0];
-		double treeY = odo.getXYT()[1];
-		double curx = odo.getXYT()[0];
-		double cury = odo.getXYT()[1];
-		//If the robot does not see the ring || has not driven far enough 
-		while(ringUsSensor.UltrasonicPoller.get_distance() > ringDist || convertDistance(2.2, distanceConversion( curx, cury, treeX, treeY)) >= treeBase ){ 
-			left.backward();
-			right.backward();
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-			}
-		}//If the ring was found 
-		if(ringUsSensor.UltrasonicPoller.get_distance() < ringDist){
-			left.setSpeed(0);
-			right.setSpeed(0);
-			//Call ring found
-			ringFound();
-			//Travels the remaining distance
-			left.setSpeed(SEARCH_SPEED);
-			right.setSpeed(SEARCH_SPEED);
-			left.rotate(convertDistance(distanceConversion(curx, cury, treeX, treeY), 5), true);
-			right.rotate(convertDistance(distanceConversion(curx, cury, treeX, treeY), 5), false);
+
+		//If robot is not at right spot to read 
+		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
+		//Ring is in front of sensor
+		left.setSpeed(0);
+		right.setSpeed(0);
+		//Call ring found
+		ringFound();
+		//Travels the remaining distance
+		left.setSpeed(SEARCH_SPEED);
+		right.setSpeed(SEARCH_SPEED);
+		left.rotate(-convertDistance(WHEEL_RAD, ts/2 + ringDist), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts/2 + ringDist), false);
 			
-		}
-		//If no ring was found sleeps thread and goes back
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -124,11 +117,6 @@ public class Grasp {
 	}
 	
 	private static void ringFound() { //Method called once a ring has been found
-		left.setSpeed(SEARCH_SPEED);
-		right.setSpeed(SEARCH_SPEED);
-		//usSensor and colo	r sensor are offset by 2.2cm
-		left.rotate(convertDistance(colorOffset, 5), true);
-		right.rotate(convertDistance(colorOffset, 5), false);
 		//Call color sensor
 		int color = findMatch();
 		//Return beeps accordingly
@@ -164,10 +152,13 @@ public class Grasp {
 		
 	}
 	private static void turn(double theta) { //Simple turning method
+		if (theta > 180) theta -= 360;
+		if (theta < -180) theta += 360;
+		//if (theta > 0) theta += 20;
 		left.setSpeed(ROTATE_SPEED);
 		right.setSpeed(ROTATE_SPEED);
-		left.rotate(convertAngle(leftR, trac, theta), true);
-		right.rotate(-convertAngle(rightR, trac, theta), false);
+		left.rotate(-convertAngle(leftR, trac, theta), true);
+		right.rotate(convertAngle(rightR, trac, theta), false);
 	}
 	private static double distanceConversion(double curx, double cury, double treeX, double treeY){
 		return Math.sqrt((curx - treeX) * (curx - treeX) + (cury - treeY) * (cury - treeY));
@@ -186,5 +177,85 @@ public class Grasp {
 
 	private static int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, pi * width * angle / 360.0);
+	}
+	
+	/**
+	 * This method travels the robot backward until both motors see the line,
+	 * making sure that the two motors start at the same line.
+	 */
+	private static void adjustOrientation() {
+		double leftlight1 = 0, rightlight1 = 0, leftlight2 = 0, rightlight2 = 0; // 2 : current reading; 1: previous reading
+		boolean left_passed = false, right_passed = false; // indicates that the left/right light sensor has passed a line
+		// go backward
+		left.setSpeed(TRAVEL_SPEED);
+		right.setSpeed(TRAVEL_SPEED);
+		left.forward();
+		right.forward();
+		// stop at the line
+		while(true) { // if loop breaks when both sensors have seen the line
+			leftlight2 = LightSensorLeft.get_light();
+			rightlight2 = LightSensorRight.get_light();
+			if (leftlight1 - leftlight2 > black) {
+				freeze();
+				left_passed = true;
+			    //left_time = System.currentTimeMillis();
+			    Sound.beep();
+			    break;
+			}
+			if (rightlight1 - rightlight2 > black) {
+				freeze();
+				right_passed = true;
+			    //right_time = System.currentTimeMillis();
+			    Sound.beep();
+			    break;
+			}
+			try {
+				Thread.sleep(DETECTION_PERIOD);
+			} catch (InterruptedException e) {
+
+			}
+			leftlight1 = leftlight2;
+			rightlight1 = rightlight2;
+		}
+		freeze();
+		
+		if (left_passed) {
+			right.setSpeed(TRAVEL_SPEED);
+			right.forward();
+			while(true) {
+				rightlight2 = LightSensorRight.get_light();
+				if (rightlight1 - rightlight2 > black) break; 
+				try {
+					Thread.sleep(DETECTION_PERIOD);
+				} catch (InterruptedException e) {
+
+				}
+				rightlight1 = rightlight2;
+			}
+		}
+		else { // right passed
+			left.setSpeed(TRAVEL_SPEED);
+			left.forward();
+			while(true) {
+				leftlight2 = LightSensorLeft.get_light();
+				if (leftlight1 - leftlight2 > black) break; 
+				try {
+					Thread.sleep(DETECTION_PERIOD);
+				} catch (InterruptedException e) {
+
+				}
+				leftlight1 = leftlight2;
+			}
+		}
+		freeze();
+		Sound.beep();
+	}
+	
+	/**
+	 * This method sets the speeds of both left and right motors to 0
+	 */
+	private static void freeze() {
+		left.setSpeed(0);
+		right.setSpeed(0);
 	}
 }
