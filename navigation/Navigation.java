@@ -126,12 +126,12 @@ public class Navigation {
 		adjustOrientation();
 		// now we have to head to the direction of the tunnel
 		if (!tunnelIsVertical) {
-			travelDistanceBack(ts / 2 - 10);
+			travelDistanceBack(ts / 2 - 11);
 			turn(90 - odo.getXYT()[2]);
 			odo.setTheta(90);
 		}
 		else {
-			travelDistanceBack(ts / 2 - 10);
+			travelDistanceBack(ts / 2 - 11);
 			turn(0 - odo.getXYT()[2]);
 			odo.setTheta(0);
 		}
@@ -139,26 +139,38 @@ public class Navigation {
 		adjustOrientation();
 		// now the robot should be heading to the tunnel
 		// Travel the distance of the tunnel + 1, so that we are on the other side of the tunnel
-		travelDistance((T_Length + 2) * ts + offset);
+		travelDistance((T_Length + 2) * ts + offset + 5);
 		// update leftaxis and rightaxis
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(180 - odo.getXYT()[2]);
 			odo.setTheta(180);
 			travelDistance(ts / 2);
-			odo.setX((tn_ur_x + 1) * ts);
-			odo.setY((tn_ur_y - 1) * ts);
+			if (toLL) {
+				currentx = tn_ur_x + 1;
+				currenty = tn_ur_y - 1;
+			}
+			else {
+				currentx = tn_ll_x - 1;
+				currenty = tn_ll_y + 1;
+			}
 		}
 		else { // tunnel is along y-axis
 			turn(270 - odo.getXYT()[2]);
 			odo.setTheta(270);
 			travelDistance(ts / 2);
-			odo.setX((tn_ur_x - 1) * ts);
-			odo.setY((tn_ur_y + 1) * ts);
+			if (toLL) {
+				currentx = tn_ur_x - 1;
+				currenty = tn_ur_y + 1;
+			}
+			else {
+				currentx = tn_ll_x + 1;
+				currenty = tn_ll_y - 1;
+			}
 		}
 		// now the robot should be positioned at the exit of the tunnel
 		// (the grid diagonal to the UR point of tunnel)
 		// the next step is to travel the robot to the tree
-		int treex = Tx - 1, treey = Ty;
+		int treex = Tx - 1, treey = Ty - 1;
 		travelTo(treex, treey);
 		Grasp.grasp(leftM, rightM, radius, radius, trac, odo);
 		// after the grasping, the robot should travel back to the starting position
@@ -207,15 +219,27 @@ public class Navigation {
 			turn(0 - odo.getXYT()[2]);
 			odo.setTheta(0);
 			travelDistance(ts / 2);
-			odo.setX((tn_ll_x - 1) * ts);
-			odo.setY((tn_ll_y + 1) * ts);
+			if (toLL) {
+				currentx = tn_ll_x - 1;
+				currenty = tn_ll_y + 1;
+			}
+			else {
+				currentx = tn_ur_x + 1;
+				currenty = tn_ur_y - 1;
+			}
 		}
 		else { // tunnel is along y-axis
 			turn(90 - odo.getXYT()[2]);
 			odo.setTheta(90);
 			travelDistance(ts / 2);
-			odo.setX((tn_ll_x + 1) * ts);
-			odo.setY((tn_ll_y - 1) * ts);
+			if (toLL) {
+				currentx = tn_ll_x + 1;
+				currenty = tn_ll_y - 1;
+			}
+			else {
+				currentx = tn_ur_x - 1;
+				currenty = tn_ur_y + 1;
+			}
 		}
 		// now the robot should be positioned at the entrance of the tunnel with leftaxis and rightaxis updated
 		// next go back to the starting corner

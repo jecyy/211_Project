@@ -37,10 +37,54 @@ public class Project {
 	private static final Port rightLight = LocalEV3.get().getPort("S3");
 	private static final Port portColor = LocalEV3.get().getPort("S4");
 	public static final double WHEEL_RAD = 2.2;
-	public static final double TRACK = 13.0;
+	public static final double TRACK = 15.0;
 
 
 	public static void main(String[] args) throws OdometerExceptions{
+		int buttonChoice;
+		// Odometer related objects
+		final Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+		Display display = new Display(lcd);
+		// Ultrasonic sensor
+		@SuppressWarnings("resource") // Because we don't bother to close this resource
+		SensorModes usSensor = new EV3UltrasonicSensor(usPort); // usSensor is the instance
+		SampleProvider usDistance = usSensor.getMode("Distance"); // usDistance provides samples from
+		float[] usData = new float[usDistance.sampleSize()]; // usData is the buffer in which data are
+		//Ring ultrasonic sensor
+//		@SuppressWarnings("resource") 
+//		SensorModes ringUsSensor = new EV3UltrasonicSensor(ringUsPort); 
+//		SampleProvider ringUsDistance = ringUsSensor.getMode("Distance"); 
+//		float[] ringUsData = new float[ringUsDistance.sampleSize()]; 
+		// leftLight sensor
+		@SuppressWarnings("resource")
+		SensorModes leftlight = new EV3ColorSensor(leftLight);
+		SampleProvider leftLightSample = leftlight.getMode("Red");
+		float[] sampleLightleft = new float[leftlight.sampleSize()];
+		// rightLight sensor
+		@SuppressWarnings("resource")
+		SensorModes rightlight = new EV3ColorSensor(rightLight);
+		SampleProvider rightLightSample = rightlight.getMode("Red");
+		float[] sampleLightright = new float[rightlight.sampleSize()];
+		// Color sensor
+		@SuppressWarnings("resource")
+		SensorModes myColor = new EV3ColorSensor(portColor);
+		SampleProvider myColorSample = myColor.getMode("RGB");
+		float[] sampleColor = new float[3];
+		// returned
+		UltrasonicPoller ultrasonic = new UltrasonicPoller(usDistance, usData);
+		//UltrasonicPoller ringUltrasonic = new UltrasonicPoller(ringUsDistance, ringUsData);
+		LightSensorLeft leftlightsensor = new LightSensorLeft(leftLightSample, sampleLightleft);
+		LightSensorRight rightlightsensor = new LightSensorRight(rightLightSample, sampleLightright);
+		ColorSensorPoller color = new ColorSensorPoller(myColorSample, sampleColor);
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		//		boolean isRed = false;
 		//	    
 		//	    @SuppressWarnings("rawtypes")
@@ -98,15 +142,15 @@ public class Project {
 		lly = 0;
 		urx = 4;
 		ury = 4;
-		tnllx = 4;
+		tnllx = 3;
 		tnlly = 2;
-		tnurx = 6;
+		tnurx = 5;
 		tnury = 3;
 		tx = 7;
 		ty = 4;
 
 
-		islandllx = 0;
+		islandllx = 5;
 		islandlly = 0;
 		islandurx = 8;
 		islandury = 8;
@@ -115,41 +159,7 @@ public class Project {
 
 
 
-		int buttonChoice;
-		// Odometer related objects
-		final Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
-		Display display = new Display(lcd);
-		// Ultrasonic sensor
-		@SuppressWarnings("resource") // Because we don't bother to close this resource
-		SensorModes usSensor = new EV3UltrasonicSensor(usPort); // usSensor is the instance
-		SampleProvider usDistance = usSensor.getMode("Distance"); // usDistance provides samples from
-		float[] usData = new float[usDistance.sampleSize()]; // usData is the buffer in which data are
-		//Ring ultrasonic sensor
-		@SuppressWarnings("resource") 
-		SensorModes ringUsSensor = new EV3UltrasonicSensor(ringUsPort); 
-		SampleProvider ringUsDistance = ringUsSensor.getMode("Distance"); 
-		float[] ringUsData = new float[ringUsDistance.sampleSize()]; 
-		// leftLight sensor
-		@SuppressWarnings("resource")
-		SensorModes leftlight = new EV3ColorSensor(leftLight);
-		SampleProvider leftLightSample = leftlight.getMode("Red");
-		float[] sampleLightleft = new float[leftlight.sampleSize()];
-		// rightLight sensor
-		@SuppressWarnings("resource")
-		SensorModes rightlight = new EV3ColorSensor(rightLight);
-		SampleProvider rightLightSample = rightlight.getMode("Red");
-		float[] sampleLightright = new float[rightlight.sampleSize()];
-		// Color sensor
-		@SuppressWarnings("resource")
-		SensorModes myColor = new EV3ColorSensor(portColor);
-		SampleProvider myColorSample = myColor.getMode("RGB");
-		float[] sampleColor = new float[3];
-		// returned
-		UltrasonicPoller ultrasonic = new UltrasonicPoller(usDistance, usData);
-		UltrasonicPoller ringUltrasonic = new UltrasonicPoller(ringUsDistance, ringUsData);
-		LightSensorLeft leftlightsensor = new LightSensorLeft(leftLightSample, sampleLightleft);
-		LightSensorRight rightlightsensor = new LightSensorRight(rightLightSample, sampleLightright);
-		ColorSensorPoller color = new ColorSensorPoller(myColorSample, sampleColor);
+		
 
 		do {
 			// clear the display
@@ -173,12 +183,14 @@ public class Project {
 			// Start UltrasonicPoller
 			Thread UltrasonicThread = new Thread(ultrasonic);
 			UltrasonicThread.start();
+//			Thread ringUsThread = new Thread(ringUltrasonic);
+//			ringUsThread.start();
 			Thread rightThread = new Thread(rightlightsensor);
 			rightThread.start();
 
 //			(new Thread() {
 //				public void run() {
-//					Localizer.run(leftMotor, rightMotor, WHEEL_RAD, WHEEL_RAD, TRACK, odometer);
+//					Localizer.run(leftMotor, rightMotor, WHEEL_RAD, WHEEL_RAD, TRACK, odometer, starting_corner);
 //				}
 //			}).start();
 //
@@ -188,6 +200,7 @@ public class Project {
 			colorThread.start();
 			Thread leftThread = new Thread(leftlightsensor);
 			leftThread.start();
+
 
 
 			(new Thread() { // spawn a new Thread to avoid Search.run() from blocking
