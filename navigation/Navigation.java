@@ -32,7 +32,7 @@ public class Navigation {
 	private static final int ROTATE_SPEED = 75;
 	private static final int FORWARD_SPEED = 175;
 	private static final double ts = 30.48;
-	private static final int black = 50; // threshold for black line
+	private static final int black = 100; // threshold for black line
 	private static final double offset = 10; // TODO: the distance between the center of light-track and the center of rotation
 	private static int currentx, currenty;
 	private static final int DETECTION_PERIOD = 30;
@@ -65,6 +65,7 @@ public class Navigation {
 		final int T_Length = tunnelLength(tn_ll_x, tn_ll_y, tn_ur_x, tn_ur_y);
 		final boolean tunnelIsVertical = tunnelIsVertical( tn_ll_y, tn_ur_y, starting_corner, islandury, islandlly);
 		final int startx, starty;
+		final boolean toLL = toLL(tn_ll_x, tn_ll_y, tn_ur_x, tn_ur_y, starting_corner, tunnelIsVertical);
 		// adjust startx, starty, currentx, currenty first
 		if (starting_corner == 0) {
 			startx = 1;
@@ -99,41 +100,57 @@ public class Navigation {
 		int tunnelx , tunnely; // the tile we need to get to before entering the tunnel
 		
 		if (!tunnelIsVertical) { // tunnel is along x-axis
-			tunnelx = tn_ll_x - 1;
-			tunnely = tn_ll_y + 1;
+			if (toLL) {
+				tunnelx = tn_ll_x - 1;
+				tunnely = tn_ll_y + 1;
+			}
+			else {
+				tunnelx = tn_ur_x + 1;
+				tunnely = tn_ur_y - 1;
+			}
 		}
 		else { // tunnel is along y-axis
-			tunnelx = tn_ll_x + 1;
-			tunnely = tn_ll_y - 1;
+			if (toLL) {
+				tunnelx = tn_ll_x + 1;
+				tunnely = tn_ll_y - 1;
+			}
+			else {
+				tunnelx = tn_ur_x - 1;
+				tunnely = tn_ur_y + 1;
+			}
 		}
-		
-		
 		
 		// travel to the tunnel
 		travelTo(tunnelx, tunnely); // travel to the grid diagonal to the LL point of tunnel
+		// adjust the position
+		adjustOrientation();
 		// now we have to head to the direction of the tunnel
-		if (tunnelIsVertical) {
-			turn(180 - odo.getXYT()[2]);
-			travelDistance(ts / 2);
+		if (!tunnelIsVertical) {
+			travelDistanceBack(ts / 2 - 10);
 			turn(90 - odo.getXYT()[2]);
+			odo.setTheta(90);
 		}
 		else {
-			turn(270 - odo.getXYT()[2]);
-			travelDistance(ts / 2);
+			travelDistanceBack(ts / 2 - 10);
 			turn(0 - odo.getXYT()[2]);
+			odo.setTheta(0);
 		}
+		// adjust the heading
+		adjustOrientation();
 		// now the robot should be heading to the tunnel
 		// Travel the distance of the tunnel + 1, so that we are on the other side of the tunnel
-		travelDistance(T_Length * ts + 1);
+		travelDistance((T_Length + 2) * ts + offset);
 		// update leftaxis and rightaxis
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(180 - odo.getXYT()[2]);
+			odo.setTheta(180);
 			travelDistance(ts / 2);
 			odo.setX((tn_ur_x + 1) * ts);
 			odo.setY((tn_ur_y - 1) * ts);
 		}
 		else { // tunnel is along y-axis
 			turn(270 - odo.getXYT()[2]);
+			odo.setTheta(270);
 			travelDistance(ts / 2);
 			odo.setX((tn_ur_x - 1) * ts);
 			odo.setY((tn_ur_y + 1) * ts);
@@ -148,36 +165,54 @@ public class Navigation {
 		//Returning
 		// first, let's go back to the tunnel
 		if (!tunnelIsVertical) { // tunnel is along x-axis
-			tunnelx = tn_ur_x + 1;
-			tunnely = tn_ur_y - 1;
+			if (toLL) {
+				tunnelx = tn_ur_x + 1;
+				tunnely = tn_ur_y - 1;
+			}
+			else {
+				tunnelx = tn_ll_x - 1;
+				tunnely = tn_ll_y + 1;
+			}
 		}
 		else { // tunnel is along y-axis
-			tunnelx = tn_ur_x - 1;
-			tunnely = tn_ur_y + 1;
+			if (toLL) {
+				tunnelx = tn_ur_x - 1;
+				tunnely = tn_ur_y + 1;
+			}
+			else {
+				tunnelx = tn_ll_x + 1;
+				tunnely = tn_ll_y - 1;
+			}
 		}
 		travelTo(tunnelx, tunnely);
+		// adjust the position
+		adjustOrientation();
 		// head to tunnel
 		if (!tunnelIsVertical) { // tunnel along x-axis
-			turn(0 - odo.getXYT()[2]);
-			travelDistance(ts / 2);
+			travelDistanceBack(ts / 2 - 10);
 			turn(270 - odo.getXYT()[2]);
+			odo.setTheta(270);
 		}
 		else {
-			turn(90 - odo.getXYT()[2]);
-			travelDistance(ts / 2);
+			travelDistanceBack(ts / 2 - 10);
 			turn(180 - odo.getXYT()[2]);
+			odo.setTheta(180);
 		}
+		// adjust heading
+		adjustOrientation();
 		// go thorugh the tunnel
-		travelDistance(T_Length * ts + 1);
-		// update leftaxis and rightaxis
+		travelDistance((T_Length + 2) * ts + offset);
+		// update odometer
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(0 - odo.getXYT()[2]);
+			odo.setTheta(0);
 			travelDistance(ts / 2);
 			odo.setX((tn_ll_x - 1) * ts);
 			odo.setY((tn_ll_y + 1) * ts);
 		}
 		else { // tunnel is along y-axis
 			turn(90 - odo.getXYT()[2]);
+			odo.setTheta(90);
 			travelDistance(ts / 2);
 			odo.setX((tn_ll_x + 1) * ts);
 			odo.setY((tn_ll_y - 1) * ts);
@@ -200,25 +235,29 @@ public class Navigation {
 		// x direction
 		if (xdis >= 0) {
 			turn(90 - odo.getXYT()[2]); // turn to 90 degree
+			odo.setTheta(90);
 		}
 		else {
 			turn(270 - odo.getXYT()[2]); // turn to 270 degree
+			odo.setTheta(270);
 		}
 		lineTravel(Math.abs(xdis));
 		currentx = x;
 		// y direction
 		if (ydis > 0) {
 			turn(0 - odo.getXYT()[2]); // turn to 0 degree
+			odo.setTheta(0);
 		}
 		else {
 			turn(180 - odo.getXYT()[2]); // turn to 180 degree
+			odo.setTheta(180);
 		}
 		lineTravel(Math.abs(ydis));
 		currenty = y;
 	}
 	
 	/**
-	 * This method travels the robot for a given distance forward, without ant correction.
+	 * This method travels the robot for a given distance forward, without any correction.
 	 * @param s
 	 */
 	private static void travelDistance(double s) {
@@ -226,6 +265,17 @@ public class Navigation {
 		rightM.setSpeed(FORWARD_SPEED);
 		leftM.rotate(-convertDistance(radius, s), true);
 		rightM.rotate(-convertDistance(radius, s), false);
+	}
+	
+	/**
+	 * This method travels the robot for a given distance backward, without any correction.
+	 * @param s
+	 */
+	private static void travelDistanceBack(double s) {
+		leftM.setSpeed(FORWARD_SPEED);
+		rightM.setSpeed(FORWARD_SPEED);
+		leftM.rotate(convertDistance(radius, s), true);
+		rightM.rotate(convertDistance(radius, s), false);
 	}
 	
 	/**
@@ -332,13 +382,75 @@ public class Navigation {
 	}
 
 	/**
-	 * This method uses the distance of the two light sensors along the expected direction of traveling
-	 * and calculates the angle that the robot should turn in order to correct its orientation
-	 * @param b
+	 * This method travels the robot backward until both motors see the line,
+	 * making sure that the two motors start at the same line.
 	 */
-	private static void adjustOrientation(double d) {
-		double adjust = Math.asin(d / lightTrac) * 180 / pi;
-		turn(adjust);
+	private static void adjustOrientation() {
+		double leftlight1 = 0, rightlight1 = 0, leftlight2 = 0, rightlight2 = 0; // 2 : current reading; 1: previous reading
+		boolean left_passed = false, right_passed = false; // indicates that the left/right light sensor has passed a line
+		// go backward
+		leftM.setSpeed(FORWARD_SPEED);
+		rightM.setSpeed(FORWARD_SPEED);
+		leftM.forward();
+		rightM.forward();
+		// stop at the line
+		while(true) { // if loop breaks when both sensors have seen the line
+			leftlight2 = LightSensorLeft.get_light();
+			rightlight2 = LightSensorRight.get_light();
+			if (leftlight1 - leftlight2 > black) {
+				freeze();
+				left_passed = true;
+			    //left_time = System.currentTimeMillis();
+			    Sound.beep();
+			    break;
+			}
+			if (rightlight1 - rightlight2 > black) {
+				freeze();
+				right_passed = true;
+			    //right_time = System.currentTimeMillis();
+			    Sound.beep();
+			    break;
+			}
+			try {
+				Thread.sleep(DETECTION_PERIOD);
+			} catch (InterruptedException e) {
+
+			}
+			leftlight1 = leftlight2;
+			rightlight1 = rightlight2;
+		}
+		freeze();
+		
+		if (left_passed) {
+			rightM.setSpeed(FORWARD_SPEED);
+			rightM.forward();
+			while(true) {
+				rightlight2 = LightSensorRight.get_light();
+				if (rightlight1 - rightlight2 > black) break; 
+				try {
+					Thread.sleep(DETECTION_PERIOD);
+				} catch (InterruptedException e) {
+
+				}
+				rightlight1 = rightlight2;
+			}
+		}
+		else { // right passed
+			leftM.setSpeed(FORWARD_SPEED);
+			leftM.forward();
+			while(true) {
+				leftlight2 = LightSensorLeft.get_light();
+				if (leftlight1 - leftlight2 > black) break; 
+				try {
+					Thread.sleep(DETECTION_PERIOD);
+				} catch (InterruptedException e) {
+
+				}
+				leftlight1 = leftlight2;
+			}
+		}
+		freeze();
+		Sound.beep();
 	}
 	
 	/**
@@ -346,6 +458,8 @@ public class Navigation {
 	 * @param theta
 	 */
 	private static void turn(double theta) {
+		if (theta > 180) theta -= 360;
+		if (theta < -180) theta += 360;
 		leftM.setSpeed(ROTATE_SPEED);
 		rightM.setSpeed(ROTATE_SPEED);
 		leftM.rotate(-convertAngle(radius, trac, theta), true);
@@ -418,7 +532,7 @@ public class Navigation {
 	 */
 	private static int heading() {
 		double angle = odo.getXYT()[2];
-		if (angle < 45 && angle > 315) {
+		if (angle < 45 || angle > 315) {
 			return 0; // 0
 		}
 		else if (angle > 45 && angle < 135) {
@@ -442,15 +556,15 @@ public class Navigation {
 	private static boolean tunnelIsVertical( int tn_ll_y, int tn_ur_y, int starting_location, int islandury, int islandlly){ //TODO: Get vertical tunnel
 		if(starting_location < 2){
 			if(tn_ur_y > islandlly){
-				return true;
-			}else{
 				return false;
+			}else{
+				return true;
 			}
 		}else{
 			if(tn_ll_y < islandury){
-				return true;
-			}else{
 				return false;
+			}else{
+				return true;
 			}
 		}
 	}
@@ -470,6 +584,16 @@ public class Navigation {
 		}
 	}
 	
+	/**
+	 * This method indicates whether the robot should travel to LL tunnel or UR tunnel from the starting corner.
+	 * @param tn_ll_x
+	 * @param tn_ll_y
+	 * @param tn_ur_x
+	 * @param tn_ur_y
+	 * @param starting_corner
+	 * @param tunnelIsVertical
+	 * @return
+	 */
 	private static boolean toLL(int tn_ll_x, int tn_ll_y, int tn_ur_x, int tn_ur_y, int starting_corner, boolean tunnelIsVertical) {
 		if (starting_corner == 0) return true;
 		else if (starting_corner == 1) {
