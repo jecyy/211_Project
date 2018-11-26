@@ -16,18 +16,10 @@ import unload.Unload;
  *
  */
 public class Navigation {
-	/*TODO: Fix odometer, it dirves backwards we have a few different solutions
-	 * 		1. Use heading variable that determines where it should be facing and how it should turn
-	 *		2. Actually fix odometer 
-	 *		3. Change orientation of motors
-	 */
-	public static int[] leftaxis = new int[2];  // TODO: be consistent with starting position 
-	public static int[] rightaxis = new int[2]; // grid position of the light sensors
 	private static EV3LargeRegulatedMotor leftM;
 	private static EV3LargeRegulatedMotor rightM;
 	private static double radius, trac;
 	private static Odometer odo;
-	private static double lightTrac = 7.5; // TODO: measure the distance between two light sensors
 	private static double pi = Math.PI;
 	private static final int ROTATE_SPEED = 75;
 	private static final int FORWARD_SPEED = 175;
@@ -243,11 +235,14 @@ public class Navigation {
 				currenty = tn_ur_y + 1;
 			}
 		}
-		// now the robot should be positioned at the entrance of the tunnel with leftaxis and rightaxis updated
+		// now the robot should be positioned at the entrance of the tunnel
 		// next go back to the starting corner
 		travelTo(startx, starty);
 		//Unload the rings
 		Unload.unload();
+		Sound.twoBeeps();
+		Sound.twoBeeps();
+		Sound.beep();
 	}
 
 	/**
@@ -379,10 +374,6 @@ public class Navigation {
 			}
 		}
 		Sound.beep();
-		
-//		long dif = left_time - right_time; // time difference between the two detections
-//		double d = FORWARD_SPEED * (dif / 1000) * (pi / 180) * radius; // distance traveled by the robot within dif
-//		adjustOrientation(d); // adjust the orientation
 		freeze();
 		// correct the odometer orientation &
 		// correct the odometer position
@@ -422,14 +413,12 @@ public class Navigation {
 			if (leftlight1 - leftlight2 > black) {
 				freeze();
 				left_passed = true;
-			    //left_time = System.currentTimeMillis();
 			    Sound.beep();
 			    break;
 			}
 			if (rightlight1 - rightlight2 > black) {
 				freeze();
 				right_passed = true;
-			    //right_time = System.currentTimeMillis();
 			    Sound.beep();
 			    break;
 			}
@@ -482,7 +471,6 @@ public class Navigation {
 	private static void turn(double theta) {
 		if (theta > 180) theta -= 360;
 		if (theta < -180) theta += 360;
-		//if (theta > 0) theta += 0;
 		leftM.setSpeed(ROTATE_SPEED);
 		rightM.setSpeed(ROTATE_SPEED);
 		leftM.rotate(-convertAngle(radius, trac, theta), true);
@@ -540,10 +528,8 @@ public class Navigation {
 
 		if (isClockwise == true) {
 			leftM.backward();
-			//rightM.forward();
 		}
 		else {
-			//leftM.forward();
 			rightM.backward();
 		}
 	}
