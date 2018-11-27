@@ -70,18 +70,22 @@ public class Grasp {
 		//turn(-90);
 		//Tree circulating
 		search();
-		turn(-90);
-		search();
-		turn(-90);
-		search();
-		turn(-90);
-		search();
-		double x = odo.getXYT()[0];
-		double y = odo.getXYT()[1];
+//		turn(-90);
+//		search();
+//		turn(-90);
+//		search();
+//		turn(-90);
+//		search();
+//		double x = odo.getXYT()[0];
+//		double y = odo.getXYT()[1];
 		//Return back to starting point TODO: change this to drive until sees line
-		left.rotate(convertDistance(distanceConversion(x, y, orix, oriy), 5), true);
-		right.rotate(convertDistance(distanceConversion(x, y, orix, oriy), 5), false);
-		
+//		left.rotate(convertDistance(distanceConversion(x, y, orix, oriy), 5), true);
+//		right.rotate(convertDistance(distanceConversion(x, y, orix, oriy), 5), false);
+		left.rotate(convertDistance(WHEEL_RAD, ts * 1.5 + ringDist), true);
+		right.rotate(convertDistance(WHEEL_RAD, ts * 1.5 + ringDist), false);
+		turn(-90);
+		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
