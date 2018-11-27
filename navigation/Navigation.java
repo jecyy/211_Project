@@ -67,24 +67,24 @@ public class Navigation {
 			odo.setTheta(0);
 		}
 		else if (starting_corner == 1) {
-			startx = 7;
+			startx = 14;
 			starty = 1;
-			currentx = 7;
+			currentx = 14;
 			currenty = 1;
 			odo.setTheta(270);
 		}
 		else if (starting_corner == 2) {
-			startx = 7;
-			starty = 7;
-			currentx = 7;
-			currenty = 7;
+			startx = 14;
+			starty = 8;
+			currentx = 14;
+			currenty = 8;
 			odo.setTheta(180);
 		}
 		else { // starting_corner == 3
 			startx = 1;
-			starty = 7;
+			starty = 8;
 			currentx = 1;
-			currenty = 7;
+			currenty = 8;
 			odo.setTheta(90);
 		}
 		// in the very beginning, the robot should be located around the center of the starting corner
