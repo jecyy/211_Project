@@ -24,7 +24,7 @@ public class Localizer {
 	private static EV3LargeRegulatedMotor leftMotor;
 	private static EV3LargeRegulatedMotor rightMotor;
 	private static double leftRadius, rightRadius, track;
-	private static final int ROTATE_SPEED = 150;
+	private static final int ROTATE_SPEED = 200;
 	private static final double ts = 30.48;
 	private static final double d = 35; // threshold for determining alpha and beta
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall

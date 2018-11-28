@@ -118,12 +118,12 @@ public class Navigation {
 		adjustOrientation();
 		// now we have to head to the direction of the tunnel
 		if (!tunnelIsVertical) {
-			travelDistanceBack(ts / 2 - offset + 2);
+			travelDistanceBack(ts / 2 - offset);
 			turn(90 - odo.getXYT()[2]);
 			odo.setTheta(90);
 		}
 		else {
-			travelDistanceBack(ts / 2 - offset + 2);
+			travelDistanceBack(ts / 2 - offset);
 			turn(0 - odo.getXYT()[2]);
 			odo.setTheta(0);
 		}
@@ -137,7 +137,7 @@ public class Navigation {
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(180 - odo.getXYT()[2]);
 			odo.setTheta(180);
-			travelDistance(ts / 2);
+			travelDistance(ts / 2 - 5);
 			if (toLL) {
 				currentx = tn_ur_x + 1;
 				currenty = tn_ur_y - 1;
@@ -150,7 +150,7 @@ public class Navigation {
 		else { // tunnel is along y-axis
 			turn(270 - odo.getXYT()[2]);
 			odo.setTheta(270);
-			travelDistance(ts / 2);
+			travelDistance(ts / 2 - 5);
 			if (toLL) {
 				currentx = tn_ur_x - 1;
 				currenty = tn_ur_y + 1;
@@ -212,7 +212,7 @@ public class Navigation {
 		if (!tunnelIsVertical) { // tunnel is along x-axis
 			turn(0 - odo.getXYT()[2]);
 			odo.setTheta(0);
-			travelDistance(ts / 2);
+			travelDistance(ts / 2 - 5);
 			if (toLL) {
 				currentx = tn_ll_x - 1;
 				currenty = tn_ll_y + 1;
@@ -225,7 +225,7 @@ public class Navigation {
 		else { // tunnel is along y-axis
 			turn(90 - odo.getXYT()[2]);
 			odo.setTheta(90);
-			travelDistance(ts / 2);
+			travelDistance(ts / 2 - 5);
 			if (toLL) {
 				currentx = tn_ll_x + 1;
 				currenty = tn_ll_y - 1;

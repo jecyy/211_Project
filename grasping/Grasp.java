@@ -64,6 +64,8 @@ public class Grasp {
 		left.rotate(convertDistance(WHEEL_RAD, ts/2 - offset), true);
 		right.rotate(convertDistance(WHEEL_RAD, ts/2 - offset), false);
 		turn(90);
+		left.rotate(-convertDistance(WHEEL_RAD, 5), true);//
+		right.rotate(-convertDistance(WHEEL_RAD, 5), false);//
 		adjustOrientation();
 		left.rotate(-convertDistance(WHEEL_RAD, ts/2 + offset), true);
 		right.rotate(-convertDistance(WHEEL_RAD, ts/2 + offset), false);
@@ -100,8 +102,8 @@ public class Grasp {
 		right.setSpeed(SEARCH_SPEED);
 
 		//If robot is not at right spot to read 
-		left.rotate(-convertDistance(WHEEL_RAD, ts/2), true);
-		right.rotate(-convertDistance(WHEEL_RAD, ts/2), false);
+		left.rotate(-convertDistance(WHEEL_RAD, ts), true);
+		right.rotate(-convertDistance(WHEEL_RAD, ts), false);
 		//Ring is in front of sensor
 		left.setSpeed(0);
 		right.setSpeed(0);

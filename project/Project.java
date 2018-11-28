@@ -144,8 +144,6 @@ public class Project {
 			// Start UltrasonicPoller
 			Thread UltrasonicThread = new Thread(ultrasonic);
 			UltrasonicThread.start();
-			Thread rightThread = new Thread(rightlightsensor);
-			rightThread.start();
 
 			(new Thread() {
 				public void run() {
@@ -159,6 +157,8 @@ public class Project {
 			colorThread.start();
 			Thread leftThread = new Thread(leftlightsensor);
 			leftThread.start();
+			Thread rightThread = new Thread(rightlightsensor);
+			rightThread.start();
 
 			(new Thread() { // spawn a new Thread to avoid Search.run() from blocking
 				public void run() {
