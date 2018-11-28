@@ -26,7 +26,7 @@ public class Localizer {
 	private static double leftRadius, rightRadius, track;
 	private static final int ROTATE_SPEED = 150;
 	private static final double ts = 30.48;
-	private static final double d = 37; // threshold for determining alpha and beta
+	private static final double d = 35; // threshold for determining alpha and beta
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall
 	private static double a, b, alpha; // two edges of a triangle, with an angle used for correct orientation
 	private static double xdis, ydis; // distances from the wall
@@ -49,7 +49,7 @@ public class Localizer {
 
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {left, right}) {
 			motor.stop();
-			motor.setAcceleration(6000);
+			motor.setAcceleration(1000);
 		}
 
 		// Sleep for 2 seconds
@@ -89,16 +89,8 @@ public class Localizer {
 		}
 		Sound.beep();
 		freeze();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
 		a = UltrasonicPoller.get_distance() + extraDis;
 		turn(-gamma);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
 		b = UltrasonicPoller.get_distance() + extraDis;
 		xdis = a * b * Math.sin(gamma * pi / 180) / 
 				(Math.sqrt(a*a + b*b - 2*a*b*Math.cos(gamma*pi/180)));
@@ -111,16 +103,8 @@ public class Localizer {
 		}
 		Sound.beep();
 		freeze();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
 		a = UltrasonicPoller.get_distance() + extraDis;
 		turn(gamma);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
 		b = UltrasonicPoller.get_distance() + extraDis;
 		ydis = a * b * Math.sin(gamma * pi / 180) / 
 				(Math.sqrt(a*a + b*b - 2*a*b*Math.cos(gamma*pi/180)));
@@ -133,16 +117,8 @@ public class Localizer {
 		}
 		Sound.beep();
 		freeze();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		}
 		a = UltrasonicPoller.get_distance() + extraDis;
 		turn(-gamma);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
 		b = UltrasonicPoller.get_distance() + extraDis;
 		xdis += a * b * Math.sin(gamma * pi / 180) / 
 				(Math.sqrt(a*a + b*b - 2*a*b*Math.cos(gamma*pi/180)));
@@ -157,16 +133,8 @@ public class Localizer {
 		}
 		Sound.beep();
 		freeze();
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
 		a = UltrasonicPoller.get_distance() + extraDis;
-		turn(gamma);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-		} 
+		turn(gamma); 
 		b = UltrasonicPoller.get_distance() + extraDis;
 		ydis = ydis + a * b * Math.sin(gamma * pi / 180) / 
 				(Math.sqrt(a*a + b*b - 2*a*b*Math.cos(gamma*pi/180)));
@@ -180,17 +148,11 @@ public class Localizer {
 		odo.setTheta(180 + alpha);
 		
 		travelToStart();
-		turn(-odo.getXYT()[2]);
+		//turn(-odo.getXYT()[2] + 10); // 
 		freeze();
 		
 		Sound.beep();
 		Sound.twoBeeps(); // 3 beeps
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-
-		}
 
 		// adjust odometer according to starting corner
 		if (starting_corner == 0) {
@@ -298,8 +260,8 @@ public class Localizer {
 
 		leftMotor.setSpeed(150);
 		rightMotor.setSpeed(150);
-		leftMotor.rotate(-convertDistance(leftRadius, toTravel), true);
-		rightMotor.rotate(-convertDistance(rightRadius, toTravel), false);
+		leftMotor.rotate(-convertDistance(leftRadius, Math.abs(toTravel - 3)), true);
+		rightMotor.rotate(-convertDistance(rightRadius, Math.abs(toTravel - 3)), false);
 	}
 
 	/**
