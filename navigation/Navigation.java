@@ -21,8 +21,8 @@ public class Navigation {
 	private static double radius, trac;
 	private static Odometer odo;
 	private static double pi = Math.PI;
-	private static final int ROTATE_SPEED = 75;
-	private static final int FORWARD_SPEED = 175;
+	private static final int ROTATE_SPEED = 100;
+	private static final int FORWARD_SPEED = 200;
 	private static final double ts = 30.48;
 	private static final int black = 100; // threshold for black line
 	private static final double offset = 10; // TODO: the distance between the center of light-track and the center of rotation

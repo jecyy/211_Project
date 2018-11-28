@@ -24,7 +24,7 @@ public class Localizer {
 	private static EV3LargeRegulatedMotor leftMotor;
 	private static EV3LargeRegulatedMotor rightMotor;
 	private static double leftRadius, rightRadius, track;
-	private static final int ROTATE_SPEED = 125;
+	private static final int ROTATE_SPEED = 150;
 	private static final double ts = 30.48;
 	private static final double d = 37; // threshold for determining alpha and beta
 	private static double gamma = 30; // a fixed distacne that the robot rotates after detecting the wall
@@ -33,7 +33,7 @@ public class Localizer {
 	private static final double extraDis = 11.2; // TODO: distance from us sensor to rotation center
 	private static final double pi = Math.PI;
 	public static boolean finished = false; // indicates whether the whole ultrasonic localization process is finished
-	private static final int maxX = 8, maxY = 8; // TODO: the size of map
+	private static final int maxX = 15, maxY = 9; // TODO: the size of map
 
 	/**
 	 * This method controls the whole localization process

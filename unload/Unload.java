@@ -1,5 +1,6 @@
 package unload;
 
+import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
@@ -13,14 +14,14 @@ public class Unload {
 	/**
 	 * @param args
 	 */
-	  private static EV3LargeRegulatedMotor unloadMotor;
+	  private static final EV3LargeRegulatedMotor unloadMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));;
 	  private static int unloadSpeed = 100;
 	  private static int unloadAngle = 90;
 	  
 	  public static void unload(){
 		  
 		  unloadMotor.setSpeed(unloadSpeed);
-		  unloadMotor.rotate(unloadAngle);
+		  unloadMotor.rotate(-unloadAngle);
 		  
 		  try {
 			Thread.sleep(500);
