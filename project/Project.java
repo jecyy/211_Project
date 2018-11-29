@@ -117,24 +117,6 @@ public class Project {
 		islandurx = ((Long) data.get("Island_UR_x")).intValue();
 		islandury = ((Long) data.get("Island_UR_y")).intValue();
 
-//		starting_corner = 0;
-//		llx = 0;
-//		lly = 0;
-//		urx = 4;
-//		ury = 4;
-//		tnllx = 3;
-//		tnlly = 2;
-//		tnurx = 5;
-//		tnury = 3;
-//		tx = 7;
-//		ty = 4;
-//
-//
-//		islandllx = 5;
-//		islandlly = 0;
-//		islandurx = 8;
-//		islandury = 8;
-
 			lcd.clear();
 
 			// Start odometer

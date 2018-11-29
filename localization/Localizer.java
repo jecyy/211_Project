@@ -95,7 +95,7 @@ public class Localizer {
 		xdis = a * b * Math.sin(gamma * pi / 180) / 
 				(Math.sqrt(a*a + b*b - 2*a*b*Math.cos(gamma*pi/180)));
 		// 2. calculate distance from back wall
-		turn(90); // first turn a fixed distance to avoid mis-detecting
+		turn(180); // first turn a fixed distance to avoid mis-detecting
 		distance = 200; // initial condition to enter while loop
 		keepTurning(true); // rotate clockwise
 		while (distance > d) {
@@ -109,7 +109,7 @@ public class Localizer {
 		ydis = a * b * Math.sin(gamma * pi / 180) / 
 				(Math.sqrt(a*a + b*b - 2*a*b*Math.cos(gamma*pi/180)));
 		// 3. calculate xdis again
-		turn(-90); // first turn a fixed distance to avoid mis-detecting
+		turn(-150); // first turn a fixed distance to avoid mis-detecting
 		distance = 200;
 		keepTurning(false); // rotate anti-clockwise
 		while (distance > d) {
@@ -125,7 +125,7 @@ public class Localizer {
 		xdis /= 2;
 		odo.setX(xdis);
 		// 4. calculate ydis again
-		turn(90); // first turn a fixed distance to avoid mis-detecting
+		turn(150); // first turn a fixed distance to avoid mis-detecting
 		distance = 200; // initial condition to enter while loop
 		keepTurning(true);
 		while (distance > d) {
@@ -148,7 +148,7 @@ public class Localizer {
 		odo.setTheta(180 + alpha);
 		
 		travelToStart();
-		//turn(-odo.getXYT()[2] + 10); // 
+		turn(-odo.getXYT()[2]); // 
 		freeze();
 		
 		Sound.beep();
